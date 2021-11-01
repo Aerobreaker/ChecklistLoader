@@ -25,15 +25,27 @@ Checklist Checklist::from_file(const string &fname) {
 	ifstream infil {fil};
 	if (!infil.is_open()) return outp;
 	
-	string stepkey, stepval;
+	string key, stepkey, stepval;
 	bool inp {};
+	vector<pair<int, string>> ws;
+	int ws_cnt;
 
 	do {
+		ws_cnt = 0;
+		while (isspace(infil.peek())) {
+			++ws_cnt;
+			infil.seekg(1, ios_base::cur);
+		}
 		infil >> stepkey;
 		if (stepkey.empty()) break;
 		while (isspace(infil.peek())) infil.seekg(1, ios_base::cur);
 		inp = getline(infil, stepval) ? true : false;
-		Node *node = new Node {move(stepkey), move(stepval)};
+		while (!ws.empty() && ws_cnt <= ws.back().first) ws.pop_back();
+		key.clear();
+		for (pair<int, string> &it : ws) key += it.second;
+		key += stepkey;
+		Node *node = new Node {move(key), move(stepval)};
+		ws.push_back(make_pair(move(ws_cnt), move(stepkey)));
 		outp.add(node);
 		stepkey.clear();
 	} while (inp);

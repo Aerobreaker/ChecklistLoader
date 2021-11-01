@@ -173,10 +173,12 @@
   <ItemGroup>
     <ClCompile Include="Checklist.cpp" />
     <ClCompile Include="ChecklistLoader.cpp" />
+    <ClCompile Include="frames.cpp" />
     <ClCompile Include="window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Checklist.hpp" />
+    <ClInclude Include="frames.hpp" />
     <ClInclude Include="window.hpp" />
   </ItemGroup>
   <ItemGroup>

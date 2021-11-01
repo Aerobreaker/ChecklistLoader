@@ -9,6 +9,7 @@
 #include <wx/menu.h>
 
 #include "Checklist.hpp"
+#include "frames.hpp"
 
 class MainFrame : public wxFrame {
 private:
@@ -25,9 +26,9 @@ protected:
     wxBoxSizer *row_1_sizer;
     wxBoxSizer *row_2_sizer;
     wxCheckBox* step_1_check;
-    wxStaticText* step_1_label;
+    WrappingText* step_1_label;
     wxCheckBox* step_2_check;
-    wxStaticText* step_2_label;
+    WrappingText* step_2_label;
     wxButton* step_2_button;
 
     std::vector<Checklist> lists;
@@ -48,6 +49,7 @@ public:
     void AdvanceList(wxCommandEvent &evt);
     void RegressList(wxCommandEvent &evt);
     void OnExit(wxCommandEvent &evt);
+    void OnSize(wxSizeEvent &evt);
 
     void Resize();
     void Enable_Sub(bool enabled);
