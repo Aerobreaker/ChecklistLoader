@@ -13,29 +13,49 @@ Node::Node(const string &ky) : key(ky) {}
 Node::Node(const string &ky, const string &val) : key(ky), value(val) {}
 
 bool Node::operator< (const Node &other) const {
+	if (key.length() < other.key.length()) return true;
 	if (key.length() > other.key.length()) return false;
 	if (key < other.key) return true;
-	if (key == other.key) return value < other.value;
+	if (key > other.key) return false;
+	if (value.length() < other.value.length()) return true;
+	if (value.length() > other.value.length()) return false;
+	if (value < other.value) return true;
+	if (value > other.value) return false;
 	return false;
 };
 bool Node::operator> (const Node &other) const {
+	if (key.length() > other.key.length()) return true;
 	if (key.length() < other.key.length()) return false;
 	if (key > other.key) return true;
-	if (key == other.key) return value > other.value;
+	if (key < other.key) return false;
+	if (value.length() > other.value.length()) return true;
+	if (value.length() < other.value.length()) return false;
+	if (value > other.value) return true;
+	if (value < other.value) return false;
 	return false;
 };
 bool Node::operator== (const Node &other) const { return key == other.key && value == other.value; };
 bool Node::operator<= (const Node &other) const {
+	if (key.length() < other.key.length()) return true;
 	if (key.length() > other.key.length()) return false;
 	if (key < other.key) return true;
-	if (key == other.key) return value <= other.value;
-	return false;
+	if (key > other.key) return false;
+	if (value.length() < other.value.length()) return true;
+	if (value.length() > other.value.length()) return false;
+	if (value < other.value) return true;
+	if (value > other.value) return false;
+	return true;
 };
 bool Node::operator>= (const Node &other) const {
+	if (key.length() > other.key.length()) return true;
 	if (key.length() < other.key.length()) return false;
 	if (key > other.key) return true;
-	if (key == other.key) return value >= other.value;
-	return false;
+	if (key < other.key) return false;
+	if (value.length() > other.value.length()) return true;
+	if (value.length() < other.value.length()) return false;
+	if (value > other.value) return true;
+	if (value < other.value) return false;
+	return true;
 };
 bool Node::operator!= (const Node &other) const { return key != other.key || value != other.value; };
 
