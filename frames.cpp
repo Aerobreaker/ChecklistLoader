@@ -13,3 +13,11 @@ void WrappingText::Wrap(int width) {
 	SetLabel(shadow_label);
 	wxStaticText::Wrap(width);
 }
+
+StepSizer::StepSizer(wxStaticBox *box, int orient) : wxStaticBoxSizer(box, orient) {}
+
+StepSizer::StepSizer(int orient, wxWindow *parent, const wxString &label) : wxStaticBoxSizer(orient, parent, label) {}
+
+void StepSizer::SetLabel(const wxString &label) {
+	GetStaticBox()->SetLabel("Step " + label + ":");
+}

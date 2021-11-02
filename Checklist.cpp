@@ -3,18 +3,41 @@
 #include <filesystem>
 #include <fstream>
 
+//Source: https://github.com/timsort/cpp-TimSort
+#include "..\cpp-TimSort\include\gfx\timsort.hpp"
+
 using namespace std;
 
 Node::Node() {}
 Node::Node(const string &ky) : key(ky) {}
 Node::Node(const string &ky, const string &val) : key(ky), value(val) {}
 
-bool Node::operator< (const Node &other) const { return this->key < other.key ? true : (this->key == other.key ? this->value < other.value : false); };
-bool Node::operator> (const Node &other) const { return this->key > other.key ? true : (this->key == other.key ? this->value > other.value : false); };
-bool Node::operator== (const Node &other) const { return this->key == other.key && this->value == other.value; };
-bool Node::operator<= (const Node &other) const { return !(*this > other); };
-bool Node::operator>= (const Node &other) const { return !(*this < other); };
-bool Node::operator!= (const Node &other) const { return !(*this == other); };
+bool Node::operator< (const Node &other) const {
+	if (key.length() > other.key.length()) return false;
+	if (key < other.key) return true;
+	if (key == other.key) return value < other.value;
+	return false;
+};
+bool Node::operator> (const Node &other) const {
+	if (key.length() < other.key.length()) return false;
+	if (key > other.key) return true;
+	if (key == other.key) return value > other.value;
+	return false;
+};
+bool Node::operator== (const Node &other) const { return key == other.key && value == other.value; };
+bool Node::operator<= (const Node &other) const {
+	if (key.length() > other.key.length()) return false;
+	if (key < other.key) return true;
+	if (key == other.key) return value <= other.value;
+	return false;
+};
+bool Node::operator>= (const Node &other) const {
+	if (key.length() < other.key.length()) return false;
+	if (key > other.key) return true;
+	if (key == other.key) return value >= other.value;
+	return false;
+};
+bool Node::operator!= (const Node &other) const { return key != other.key || value != other.value; };
 
 Checklist Checklist::from_file(const string &fname) {
 	using namespace filesystem;
@@ -42,43 +65,42 @@ Checklist Checklist::from_file(const string &fname) {
 		inp = getline(infil, stepval) ? true : false;
 		while (!ws.empty() && ws_cnt <= ws.back().first) ws.pop_back();
 		key.clear();
-		for (pair<int, string> &it : ws) key += it.second;
+		for (pair<int, string> &it : ws) key += it.second.back() == '.' ? it.second : (it.second + '.');
 		key += stepkey;
 		Node *node = new Node {move(key), move(stepval)};
 		ws.push_back(make_pair(move(ws_cnt), move(stepkey)));
-		outp.add(node);
+		outp.add(node->key, node);
 		stepkey.clear();
 	} while (inp);
+
+	outp.update_order();
 
 	return outp;
 }
 
-Checklist &Checklist::add(Node *node) {
-	while (node->key.back() == '.') node->key.pop_back();
+Checklist &Checklist::add(string &key, Node *node) {
+	while (key.back() == '.') key.pop_back();
 
-	string key, subkey;
-	size_t len = node->key.find('.');
+	string basekey, subkey;
+	size_t len = key.find('.');
 	if (len == string::npos) {
-		key = node->key;
+		basekey = key;
 	} else {
-		key = move(node->key.substr(0, len));
-		subkey = move(node->key.substr(len + 1));
+		basekey = move(key.substr(0, len));
+		subkey = move(key.substr(len + 1));
 	}
 
 	if (subkey.empty()) {
-		if (contains(key)) node->sublist = at(key)->sublist;
-		insert_or_assign(move(key), node);
+		if (contains(basekey)) node->sublist = at(basekey)->sublist;
+		insert_or_assign(move(basekey), node);
 	} else {
-		node->key = move(subkey);
-		if (!(contains(key))) {
-			Node *nod = new Node(key, "");
-			insert({key, nod});
+		if (!(contains(basekey))) {
+			Node *nod = new Node(basekey, "");
+			insert({basekey, nod});
 		}
-		if (!(at(key)->sublist)) at(key)->sublist = new Checklist;
-		at(key)->sublist->add(node);
+		if (!(at(basekey)->sublist)) at(basekey)->sublist = new Checklist;
+		at(basekey)->sublist->add(subkey, node);
 	}
-
-	update_order();
 
 	return *this;
 }
@@ -90,6 +112,8 @@ void Checklist::update_order() {
 		ordered_nodes.push_back(it.second);
 		if (it.second->sublist) it.second->sublist->update_order();
 	}
+
+	gfx::timsort(ordered_nodes, [](Node *a, Node *b) {return *a < *b; });
 }
 
 Node *Checklist::operator[] (size_t ind) {

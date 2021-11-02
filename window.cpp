@@ -1,7 +1,8 @@
 #include "window.hpp"
 #include "Checklist.hpp"
 
-#include <wx\filedlg.h>
+#include <cmath>
+#include <wx/filedlg.h>
 
 using namespace std;
 constexpr char deflabel[36] = "Please load a checklist to continue";
@@ -25,6 +26,7 @@ void MainFrame::AdvanceList(wxCommandEvent &evt) {
     if (cur_ind >= cur_list.size()) return;
     if (cur_ind == 0) main_sizer->Show(row_1_sizer);
     step_1_label->UpdateLabel(cur_list[cur_ind]->value);
+    row_1_sizer->SetLabel(cur_list[cur_ind]->key);
     if (++cur_ind == cur_list.size()) {
         if (lists.size() < 2) {
             main_sizer->Hide(row_2_sizer);
@@ -34,6 +36,7 @@ void MainFrame::AdvanceList(wxCommandEvent &evt) {
         }
     } else {
         step_2_label->UpdateLabel(cur_list[cur_ind]->value);
+        row_2_sizer->SetLabel(cur_list[cur_ind]->key);
         Enable_Sub(cur_list[cur_ind]->sublist);
     }
     Resize();
@@ -51,9 +54,11 @@ void MainFrame::RegressList(wxCommandEvent &evt) {
     if (cur_ind > cur_list.size()) cur_ind = cur_list.size();
     if (cur_ind == cur_list.size()) main_sizer->Show(row_2_sizer);
     step_2_label->UpdateLabel(cur_list[--cur_ind]->value);
+    row_2_sizer->SetLabel(cur_list[cur_ind]->key);
     Enable_Sub(cur_list[cur_ind]->sublist);
     if (cur_ind) {
         step_1_label->UpdateLabel(cur_list[cur_ind - 1]->value);
+        row_1_sizer->SetLabel(cur_list[cur_ind - 1]->key);
     } else {
         main_sizer->Hide(row_1_sizer);
     }
@@ -71,7 +76,9 @@ void MainFrame::OnLoad(wxCommandEvent &evt) {
     indexes.push_back(0);
 
     step_1_label->UpdateLabel(wxEmptyString);
+    row_1_sizer->SetLabel('0');
     step_2_label->UpdateLabel(lists[0][0]->value);
+    row_2_sizer->SetLabel(lists[0][0]->key);
     Enable_Sub(lists[0][0]->sublist);
 
     Resize();
@@ -82,7 +89,9 @@ void MainFrame::OnUnload(wxCommandEvent &evt) {
     indexes.clear();
 
     step_1_label->UpdateLabel(deflabel);
+    row_1_sizer->SetLabel('0');
     step_2_label->UpdateLabel(deflabel);
+    row_1_sizer->SetLabel('1');
 
     step_1_check->SetValue(true);
     step_2_check->SetValue(false);
@@ -104,7 +113,9 @@ void MainFrame::OnSubList(wxCommandEvent &evt) {
     indexes.push_back(0);
 
     step_1_label->UpdateLabel(wxEmptyString);
+    row_1_sizer->SetLabel('0');
     step_2_label->UpdateLabel(lists.back()[0]->value);
+    row_2_sizer->SetLabel(lists.back()[0]->key);
     Enable_Sub(lists.back()[0]->sublist);
 
     main_sizer->Hide(row_1_sizer);
@@ -120,13 +131,12 @@ void MainFrame::OnUnSubList(wxCommandEvent &evt) {
 
     size_t &cur_ind = indexes.back();
     Checklist &cur_list = lists.back();
-    Node *tmp;
 
     if (cur_ind == 0) main_sizer->Hide(row_1_sizer);
-    if (cur_ind) tmp = cur_list[cur_ind - 1];
     step_1_label->UpdateLabel(cur_ind ? cur_list[cur_ind - 1]->value : deflabel);
-    tmp = cur_list[cur_ind];
+    row_1_sizer->SetLabel(cur_ind ? cur_list[cur_ind - 1]->key : "0");
     step_2_label->UpdateLabel(cur_list[cur_ind]->value);
+    row_2_sizer->SetLabel(cur_list[cur_ind]->key);
     Enable_Sub(cur_list[cur_ind]->sublist);
     
     Resize();
@@ -153,6 +163,7 @@ MainFrame::MainFrame(wxWindow *parent, wxWindowID id, const wxString &title, con
     * L - List menu
     */
     wxMenuBar *main_menu = new wxMenuBar(0);
+
     /*Menu accelerators:
     * S - Stay on top
     * Q - Quit
@@ -200,19 +211,16 @@ MainFrame::MainFrame(wxWindow *parent, wxWindowID id, const wxString &title, con
     main_toolbar->Realize();
      */
 
-    /*
-    * Test
-    */
     main_sizer = new wxBoxSizer(wxVERTICAL);
 
-    row_1_sizer = new wxBoxSizer(wxHORIZONTAL);
+    row_1_sizer = new StepSizer(wxHORIZONTAL, this, "Step 0:");
     step_1_check = new wxCheckBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0);
     row_1_sizer->Add(step_1_check, 0, wxALIGN_CENTER | wxALL, 5);
     step_1_label = new WrappingText(this, wxID_ANY, "Please load a checklist to continue", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL);
     row_1_sizer->Add(step_1_label, 1, wxALIGN_CENTER | wxALL, 5);
     main_sizer->Add(row_1_sizer, 1, wxEXPAND, 5);
 
-    row_2_sizer = new wxBoxSizer(wxHORIZONTAL);
+    row_2_sizer = new StepSizer(wxHORIZONTAL, this, "Step 1:");
     step_2_check = new wxCheckBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0);
     row_2_sizer->Add(step_2_check, 0, wxALIGN_CENTER | wxALL, 5);
     step_2_label = new WrappingText(this, wxID_ANY, "Please load a checklist to continue", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL);
@@ -221,16 +229,10 @@ MainFrame::MainFrame(wxWindow *parent, wxWindowID id, const wxString &title, con
     row_2_sizer->Add(step_2_button, 0, wxALIGN_CENTER | wxALL, 5);
     main_sizer->Add(row_2_sizer, 1, wxEXPAND, 5);
 
-    /*
-     * Bindings go here
-     * Bind({event_type}, &Function (pass function by reference, or lambda function), this[, {ID_whitelist});
-     */
     Bind(wxEVT_SIZE, &MainFrame::OnSize, this);
-
     step_1_check->Bind(wxEVT_CHECKBOX, &MainFrame::RegressList, this);
     step_2_check->Bind(wxEVT_CHECKBOX, &MainFrame::AdvanceList, this);
     step_2_button->Bind(wxEVT_BUTTON, &MainFrame::OnSubList, this);
-
     Bind(wxEVT_MENU, &MainFrame::OnStayTop, this, ID_OnTop);
     Bind(wxEVT_MENU, &MainFrame::OnLoad, this, ID_Load);
     Bind(wxEVT_MENU, &MainFrame::OnUnload, this, ID_Unload);
@@ -271,9 +273,33 @@ void MainFrame::Resize() {
     step_1_label->Wrap(step_1_label->GetClientSize().GetWidth());
     step_2_label->Wrap(step_2_label->GetClientSize().GetWidth());
     wxSize bst_size = GetBestSize();
-    if (cur_size.GetWidth() > bst_size.GetWidth()) bst_size.SetWidth(cur_size.GetWidth());
-    if (cur_size.GetHeight() > bst_size.GetHeight()) bst_size.SetHeight(cur_size.GetHeight());
+    /* Scale the size to meet the new area while maintaining aspect ratio
+    * New width and height might be off by a couple pixels due to rounding
+    * ow=old_wid, oh=old_hgt, nh=new_hgt, tw=target_wid, th=target_h, oa=old_area, na=new_area
+    * ow*oh=oa
+    * ow*nh=na
+    * tw*th=na
+    * ow/oh=tw/th
+    * 
+    * tw=ow*th/oh
+    * ow*th^2/oh=na
+    * th^2=na*oh/ow
+    * th^2=nh*oh
+    */
+    int old_wid = cur_size.GetWidth();
+    int old_hgt = cur_size.GetHeight();
+    int new_wid = bst_size.GetWidth();
+    int new_hgt = bst_size.GetHeight();
+    //cast ints to double to widen before multiplying and dividing to reduce loss of information
+    new_hgt = static_cast<int>(std::lround(std::sqrt(static_cast<double>(new_hgt) * static_cast<double>(old_hgt))));
+    new_wid = static_cast<int>(std::lround(static_cast<double>(old_wid) * static_cast<double>(new_hgt) / static_cast<double>(old_hgt)));
+    bst_size.SetWidth(old_wid > new_wid ? old_wid : new_wid);
+    bst_size.SetHeight(old_hgt > new_hgt ? old_hgt : new_hgt);
     SetSize(bst_size);
+    //Re-wrap after resizing
+    Layout();
+    step_1_label->Wrap(step_1_label->GetClientSize().GetWidth());
+    step_2_label->Wrap(step_2_label->GetClientSize().GetWidth());
     Refresh();
 }
 

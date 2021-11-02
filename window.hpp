@@ -23,8 +23,8 @@ protected:
     wxToolBarToolBase* view_parent_list;
     */
     wxBoxSizer *main_sizer;
-    wxBoxSizer *row_1_sizer;
-    wxBoxSizer *row_2_sizer;
+    StepSizer *row_1_sizer;
+    StepSizer *row_2_sizer;
     wxCheckBox* step_1_check;
     WrappingText* step_1_label;
     wxCheckBox* step_2_check;
