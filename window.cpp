@@ -1,8 +1,9 @@
 #include "window.hpp"
 #include "Checklist.hpp"
 
-#include <cmath>
 #include <wx/filedlg.h>
+
+#include <cmath>
 
 using namespace std;
 constexpr char deflabel[36] = "Please load a checklist to continue";
@@ -65,14 +66,8 @@ void MainFrame::RegressList(wxCommandEvent &evt) {
     Resize();
 }
 
-void MainFrame::OnLoad(wxCommandEvent &evt) {
-    if (!lists.empty() || !indexes.empty()) OnUnload(evt);
-
-    wxFileDialog openFile(this, "Select list file to open", wxEmptyString, wxEmptyString, "Any file|*", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-
-    if (openFile.ShowModal() == wxID_CANCEL) return;
-
-    lists.push_back(Checklist::from_file(openFile.GetPath().ToStdString()));
+void MainFrame::LoadFile(string &fname) {
+    lists.push_back(Checklist::from_file(fname));
     indexes.push_back(0);
 
     step_1_label->UpdateLabel(wxEmptyString);
@@ -82,6 +77,17 @@ void MainFrame::OnLoad(wxCommandEvent &evt) {
     Enable_Sub(lists[0][0]->sublist);
 
     Resize();
+}
+
+void MainFrame::OnLoad(wxCommandEvent &evt) {
+    if (!lists.empty() || !indexes.empty()) OnUnload(evt);
+
+    wxFileDialog openFile(this, "Select list file to open", wxEmptyString, wxEmptyString, "Any file|*", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+
+    if (openFile.ShowModal() == wxID_CANCEL) return;
+
+    string fname = openFile.GetPath().ToStdString();
+    LoadFile(fname);
 }
 
 void MainFrame::OnUnload(wxCommandEvent &evt) {
@@ -143,7 +149,6 @@ void MainFrame::OnUnSubList(wxCommandEvent &evt) {
 }
 
 void MainFrame::OnStayTop(wxCommandEvent &evt) {
-    evt.Skip();
     long cur_style = GetWindowStyle(), new_style = 0;
 
     if (m_stay_on_top->IsChecked()) {
@@ -288,18 +293,31 @@ void MainFrame::Resize() {
     */
     int old_wid = cur_size.GetWidth();
     int old_hgt = cur_size.GetHeight();
-    int new_wid = bst_size.GetWidth();
-    int new_hgt = bst_size.GetHeight();
-    //cast ints to double to widen before multiplying and dividing to reduce loss of information
-    new_hgt = static_cast<int>(std::lround(std::sqrt(static_cast<double>(new_hgt) * static_cast<double>(old_hgt))));
-    new_wid = static_cast<int>(std::lround(static_cast<double>(old_wid) * static_cast<double>(new_hgt) / static_cast<double>(old_hgt)));
-    bst_size.SetWidth(old_wid > new_wid ? old_wid : new_wid);
-    bst_size.SetHeight(old_hgt > new_hgt ? old_hgt : new_hgt);
-    SetSize(bst_size);
-    //Re-wrap after resizing
+    int new_wid = max(bst_size.GetWidth(), old_wid);
+    int new_hgt = max(bst_size.GetHeight(), old_hgt);
+    // Repeat resizing until size doesn't change
+    while (old_wid != new_wid || old_hgt != new_hgt) {
+        // Cast the ints to double to widen before multiplying and dividing to reduce loss of information
+        new_hgt = static_cast<int>(ceil(sqrt(static_cast<double>(new_hgt) * static_cast<double>(old_hgt))));
+        new_wid = static_cast<int>(ceil(static_cast<double>(old_wid) * static_cast<double>(new_hgt) / static_cast<double>(old_hgt)));
+        bst_size.SetWidth(max(old_wid, new_wid));
+        bst_size.SetHeight(max(old_hgt, new_hgt));
+        SetSize(bst_size);
+        // Re-wrap after resizing
+        Layout();
+        step_1_label->Wrap(step_1_label->GetClientSize().GetWidth());
+        step_2_label->Wrap(step_2_label->GetClientSize().GetWidth());
+        bst_size = GetBestSize();
+        old_wid = new_wid;
+        old_hgt = new_hgt;
+        new_wid = max(bst_size.GetWidth(), old_wid);
+        new_hgt = max(bst_size.GetHeight(), old_hgt);
+    }
+    Refresh();
+    // For some reason, on the next drawing cycle, sometimes the static texts won't be rendered in the vertical center of their horizontal sizer (despite having wxEXPAND set)
+    // But if we re-Layout() and invalidate the window and queue the paint request after forcing a draw cycle, it always works
+    Update();
     Layout();
-    step_1_label->Wrap(step_1_label->GetClientSize().GetWidth());
-    step_2_label->Wrap(step_2_label->GetClientSize().GetWidth());
     Refresh();
 }
 

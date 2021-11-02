@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Checklist.hpp"
+#include "frames.hpp"
+
 #include <wx/toolbar.h>
 #include <wx/checkbox.h>
 #include <wx/stattext.h>
@@ -8,8 +11,7 @@
 #include <wx/frame.h>
 #include <wx/menu.h>
 
-#include "Checklist.hpp"
-#include "frames.hpp"
+#include <string>
 
 class MainFrame : public wxFrame {
 private:
@@ -51,6 +53,7 @@ public:
     void OnExit(wxCommandEvent &evt);
     void OnSize(wxSizeEvent &evt);
 
+    void LoadFile(std::string &fname);
     void Resize();
     void Enable_Sub(bool enabled);
 
