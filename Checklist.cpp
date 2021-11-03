@@ -59,10 +59,10 @@ bool Node::operator>= (const Node &other) const {
 };
 bool Node::operator!= (const Node &other) const { return key != other.key || value != other.value; };
 
-Checklist Checklist::from_file(const string &fname) {
+Checklist *Checklist::from_file(const string &fname) {
 	using namespace filesystem;
 	path fil {fname};
-	Checklist outp {};
+	Checklist *outp = new Checklist;
 	if (!is_regular_file(fil) || !exists(fil)) return outp;
 
 	ifstream infil {fil};
@@ -89,11 +89,11 @@ Checklist Checklist::from_file(const string &fname) {
 		key += stepkey;
 		Node *node = new Node {move(key), move(stepval)};
 		ws.push_back(make_pair(move(ws_cnt), move(stepkey)));
-		outp.add(node->key, node);
+		outp->add(node->key, node);
 		stepkey.clear();
 	} while (inp);
 
-	outp.update_order();
+	outp->update_order();
 
 	return outp;
 }

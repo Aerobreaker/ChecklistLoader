@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <map>
 #include <unordered_map>
 #include <vector>
 #include <memory>
@@ -29,12 +30,12 @@ public:
 	bool operator!= (const Node &other) const;
 };
 
-class Checklist : public std::unordered_map<std::string, Node *>{
+class Checklist : public std::unordered_map<std::string, Node *> {
 private:
 	std::vector<Node *> ordered_nodes {};
 
 public:
-	static Checklist from_file(const std::string &fname);
+	static Checklist *from_file(const std::string &fname);
 	Checklist &add(std::string &key, Node *node);
 	void update_order();
 

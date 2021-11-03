@@ -33,8 +33,8 @@ protected:
     WrappingText* step_2_label;
     wxButton* step_2_button;
 
-    std::vector<Checklist> lists;
-    std::vector<size_t> indexes;
+    std::vector<Checklist *> lists {};
+    std::vector<size_t> indexes {};
 
 public:
     wxMenuItem *m_stay_on_top;
@@ -54,6 +54,8 @@ public:
     void OnSize(wxSizeEvent &evt);
 
     void LoadFile(std::string &fname);
+    void LoadFile(wxString fname);
+    void UnLoad();
     void Resize();
     void Enable_Sub(bool enabled);
 
