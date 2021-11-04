@@ -9,10 +9,6 @@
 class Checklist;
 
 class Node {
-private:
-
-protected:
-
 public:
 	std::string key {};
 	std::string value {};
@@ -30,8 +26,22 @@ public:
 	bool operator!= (const Node &other) const;
 };
 
+namespace ChecklistUtil {
+	class strcomp {
+	public:
+		strcomp() {}
+		bool operator()(const std::string &a, const std::string &b) const {
+			if (a.length() < b.length()) return true;
+			if (a.length() > b.length()) return false;
+			if (a < b) return true;
+			if (a > b) return false;
+			return false;
+		}
+	};
+}
+
 class Checklist : public std::unordered_map<std::string, Node *> {
-private:
+protected:
 	std::vector<Node *> ordered_nodes {};
 
 public:
