@@ -54,7 +54,7 @@ public:
     void OnSize(wxSizeEvent &evt);
 
     void LoadFile(std::string &fname);
-    void LoadFile(wxString fname);
+    void LoadFile(wxString &fname);
     void UnLoad();
     void Resize();
     void Enable_Sub(bool enabled);

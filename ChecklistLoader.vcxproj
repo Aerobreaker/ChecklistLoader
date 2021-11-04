@@ -74,21 +74,31 @@
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(WXWIN)\include\msvc;$(WXWIN)\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(WXWIN)\lib\vc_lib_debug;$(LibraryPath)</LibraryPath>
+    <IntDir>$(SolutionDir)bld\$(LibrariesArchitecture)\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)-$(LibrariesArchitecture)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(WXWIN)\include\msvc;$(WXWIN)\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(WXWIN)\lib\vc_x64_lib_debug;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)bld\$(LibrariesArchitecture)\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)-$(LibrariesArchitecture)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(WXWIN)\include\msvc;$(WXWIN)\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(WXWIN)\lib\vc_lib_release;$(LibraryPath)</LibraryPath>
+    <IntDir>$(SolutionDir)bld\$(LibrariesArchitecture)\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)-$(LibrariesArchitecture)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(WXWIN)\include\msvc;$(WXWIN)\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(WXWIN)\lib\vc_x64_lib_release;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)bld\$(LibrariesArchitecture)\$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)-$(LibrariesArchitecture)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

@@ -82,7 +82,7 @@ void MainFrame::LoadFile(string &fname) {
     Resize();
 }
 
-void MainFrame::LoadFile(wxString fname) {
+void MainFrame::LoadFile(wxString &fname) {
     string tmp = move(fname.ToStdString());
     return LoadFile(tmp);
 }
@@ -103,7 +103,7 @@ void MainFrame::UnLoad() {
     step_1_label->UpdateLabel(deflabel);
     row_1_sizer->SetLabel('0');
     step_2_label->UpdateLabel(deflabel);
-    row_1_sizer->SetLabel('1');
+    row_2_sizer->SetLabel('1');
 
     step_1_check->SetValue(true);
     step_2_check->SetValue(false);
