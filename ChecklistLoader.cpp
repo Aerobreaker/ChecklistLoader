@@ -7,9 +7,8 @@
 
 /*
 * Todo:
-* 1. Roll custon command-line parser to take arguments either positionally or by name
-* 2. Create options menu to save stay-on-top state and size
-* 3. Create icons for toolbar items
+* 1. Create icons for toolbar items, add toolbar items to main window
+* 2. Create options menu to save stay-on-top state and size (?)
 */
 
 using namespace std;
