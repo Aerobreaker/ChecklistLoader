@@ -2,6 +2,7 @@
 #include "Checklist.hpp"
 
 #include <wx/filedlg.h>
+#include <wx/msgdlg.h>
 
 #include <cmath>
 
@@ -69,8 +70,12 @@ void MainFrame::RegressList(wxCommandEvent &evt) {
 
 void MainFrame::LoadFile(string &fname) {
     if (!lists.empty() || !indexes.empty()) UnLoad();
-    Checklist *tmp = Checklist::from_file(fname);
-    lists.push_back(tmp);
+    Checklist *lst = Checklist::from_file(fname);
+    if (!lst) {
+        wxMessageBox("Unable to create list from file!", "Checklist Loader", wxOK | wxCENTER, this);
+        return;
+    }
+    lists.push_back(lst);
     indexes.push_back(0);
 
     step_1_label->UpdateLabel(wxEmptyString);
@@ -88,7 +93,7 @@ void MainFrame::LoadFile(wxString &fname) {
 }
 
 void MainFrame::OnLoad(wxCommandEvent &evt) {
-    wxFileDialog openFile(this, "Select list file to open", wxEmptyString, wxEmptyString, "Any file|*", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+    wxFileDialog openFile(this, "Select list file to open", wxEmptyString, wxEmptyString, "All Files (*.*)|*", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 
     if (openFile.ShowModal() == wxID_CANCEL) return;
 
@@ -305,8 +310,10 @@ void MainFrame::Resize() {
     int old_hgt = cur_size.GetHeight();
     int new_wid = max(bst_size.GetWidth(), old_wid);
     int new_hgt = max(bst_size.GetHeight(), old_hgt);
+    // This is here to prevent an infinite resizing loop
+    unsigned char cnt = 0;
     // Repeat resizing until size doesn't change
-    while (old_wid != new_wid || old_hgt != new_hgt) {
+    while (++cnt < 32 && (old_wid != new_wid || old_hgt != new_hgt)) {
         // Cast the ints to double to widen before multiplying and dividing to reduce loss of information
         new_hgt = static_cast<int>(ceil(sqrt(static_cast<double>(new_hgt) * static_cast<double>(old_hgt))));
         new_wid = static_cast<int>(ceil(static_cast<double>(old_wid) * static_cast<double>(new_hgt) / static_cast<double>(old_hgt)));

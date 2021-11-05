@@ -76,6 +76,7 @@
     <LibraryPath>$(WXWIN)\lib\vc_lib_debug;$(LibraryPath)</LibraryPath>
     <IntDir>$(SolutionDir)bld\$(LibrariesArchitecture)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)-$(LibrariesArchitecture)</TargetName>
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -91,6 +92,7 @@
     <LibraryPath>$(WXWIN)\lib\vc_lib_release;$(LibraryPath)</LibraryPath>
     <IntDir>$(SolutionDir)bld\$(LibrariesArchitecture)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)-$(LibrariesArchitecture)</TargetName>
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>

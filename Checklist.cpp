@@ -66,7 +66,7 @@ Checklist *Checklist::from_file(const string &fname) {
 	if (!is_regular_file(fil) || !exists(fil)) return outp;
 
 	ifstream infil {fil};
-	if (!infil.is_open()) return outp;
+	if (!infil.is_open()) return nullptr;
 	
 	string key, stepkey, stepval;
 	bool inp {};
@@ -75,13 +75,17 @@ Checklist *Checklist::from_file(const string &fname) {
 
 	do {
 		ws_cnt = 0;
-		while (isspace(infil.peek())) {
+		while (infil.good() && isspace(infil.peek())) {
 			++ws_cnt;
-			infil.seekg(1, ios_base::cur);
+			// For some reason with README.md, seekg gets stuck at character 118?  Get seeks right past it though.  It looks like an issue with character 10 (\n)
+			// infil.seekg(1, ios_base::cur);
+			infil.get();
 		}
+		if (!infil.good()) return nullptr;
 		infil >> stepkey;
 		if (stepkey.empty()) break;
-		while (isspace(infil.peek())) infil.seekg(1, ios_base::cur);
+		while (infil.good() && isspace(infil.peek())) infil.get();
+		if (!infil.good()) return nullptr;
 		inp = getline(infil, stepval) ? true : false;
 		while (!ws.empty() && ws_cnt <= ws.back().first) ws.pop_back();
 		key.clear();
@@ -91,7 +95,7 @@ Checklist *Checklist::from_file(const string &fname) {
 		ws.push_back(make_pair(move(ws_cnt), move(stepkey)));
 		outp->add(node->key, node);
 		stepkey.clear();
-	} while (inp);
+	} while (inp && infil.good());
 
 	outp->update_order();
 
