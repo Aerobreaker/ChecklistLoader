@@ -81,12 +81,12 @@ Checklist *Checklist::from_file(const string &fname) {
 			// infil.seekg(1, ios_base::cur);
 			infil.get();
 		}
-		if (!infil.good()) return nullptr;
+		if (!infil.good()) break;
 		infil >> stepkey;
 		if (stepkey.empty()) break;
 		while (infil.good() && isspace(infil.peek())) infil.get();
-		if (!infil.good()) return nullptr;
-		inp = getline(infil, stepval) ? true : false;
+		if (!infil.good()) break;
+		inp = static_cast<bool>(getline(infil, stepval));
 		while (!ws.empty() && ws_cnt <= ws.back().first) ws.pop_back();
 		key.clear();
 		for (pair<int, string> &it : ws) key += it.second.back() == '.' ? it.second : (it.second + '.');
@@ -96,6 +96,12 @@ Checklist *Checklist::from_file(const string &fname) {
 		outp->add(node->key, node);
 		stepkey.clear();
 	} while (inp && infil.good());
+
+	// The 3 fail bits are badbit, failbit, and eofbit.  Eofbit is fine, the other two are not
+	if (infil.bad() || infil.fail()) return nullptr;
+
+	// If nothing found, return a bad pointer
+	if (outp->empty()) return nullptr;
 
 	outp->update_order();
 
