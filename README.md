@@ -27,3 +27,25 @@
      1. Test C
      2. Test D
  3. Test 2
+
+## Compilation instructions
+ Compilation depends on 2 things:
+ 1. wxWidgets 3.1.5 or higher has been compiled with static libraries, with the _debug config for debug libraries and the _release config for release libraries
+    1. Go to https://www.wxwidgets.org/downloads/ and download the appropriate version (i.e. installer)
+    2. Install in a user-accessible directory (for example, C:\wxwidgets)
+    3. Set the environment variable WXWIN to the directory noted above (this is used in the include directories for the project)
+    4. Open a visual studio command prompt (Tools -> Command Line -> Developer Command Prompt)
+    5. Run the following commands to build x86 and x64 libraries both dynamically and statically for debug and release, with appropriate config names so that this solution will compile properly:
+```
+cd %wxwin%\build\msw
+nmake /a /f makefile.vc SHARED=0 RUNTIME_LIBS=static BUILD=debug CFG=_debug
+nmake /a /f makefile.vc SHARED=1 RUNTIME_LIBS=dynamic BUILD=debug CFG=_debug
+nmake /a /f makefile.vc SHARED=0 RUNTIME_LIBS=static BUILD=release CFG=_release
+nmake /a /f makefile.vc SHARED=1 RUNTIME_LIBS=dynamic BUILD=release CFG=_release
+"%vcinstalldir%auxiliary\build\vcvars64.bat"
+nmake /a /f makefile.vc SHARED=0 RUNTIME_LIBS=static TARGET_CPU=X64 BUILD=debug CFG=_debug
+nmake /a /f makefile.vc SHARED=1 RUNTIME_LIBS=dynamic TARGET_CPU=X64 BUILD=debug CFG=_debug
+nmake /a /f makefile.vc SHARED=0 RUNTIME_LIBS=static TARGET_CPU=X64 BUILD=release CFG=_release
+nmake /a /f makefile.vc SHARED=1 RUNTIME_LIBS=dynamic TARGET_CPU=X64 BUILD=release CFG=_release
+```
+ 2. The github repo at https://github.com/timsort/cpp-TimSort has been cloned into the same root directory as this one

@@ -3,8 +3,8 @@
 #include <filesystem>
 #include <fstream>
 
-//Source: https://github.com/timsort/cpp-TimSort
-#include "..\cpp-TimSort\include\gfx\timsort.hpp"
+// Source: https://github.com/timsort/cpp-TimSort
+#include <gfx/timsort.hpp>
 
 using namespace std;
 

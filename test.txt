@@ -20,6 +20,12 @@
 7. Test 7
 6. Test 6
 4.	Test 4
-  a. Test 4a
-	b. Test 4b
+  a. Test 4.a
+    b. Test 4.a.b
+   a. Test 4.a.a
+ b. Test 4.b
 5. Test 5
+20. Test 20
+BadStep
+Badstep value
+Badstep.2

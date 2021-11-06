@@ -68,3 +68,46 @@ bool MyApp::OnCmdLineParsed(wxCmdLineParser &parser) {
     ontop = parser.Found("t");
     return true;
 }
+
+/*
+//////////////////////////////////////////////////////////////////////////////
+//To prepare wxWidgets (for visual studio)                                  //
+//////////////////////////////////////////////////////////////////////////////
+    1. Go to https://www.wxwidgets.org/downloads/ and download the appropriate
+       version.  Installer is preferred
+    2. Install somewhere other than under C:\Program Files
+    3. (Optional) Create an environment variable (WXWIN) which maps to the
+       install directory
+    4. Open a visual studio command prompt (either by start menu shortcut or
+       by opening visual studio and navigating to Tools->Command Line->
+       Developer Command Prompt)
+    5. Run the following commands:
+            For static libraries (no need to ship libraries, but larger file):
+                cd %wxwin%\build\msw && nmake /a /f makefile.vc SHARED=0 RUNTIME_LIBS=static BUILD=debug CFG=_debug
+                cd %wxwin%\build\msw && nmake /a /f makefile.vc SHARED=0 RUNTIME_LIBS=static BUILD=release CFG=_release
+                cd %wxwin%\build\msw && "%vcinstalldir%auxiliary\build\vcvars64.bat" && nmake /a /f makefile.vc SHARED=0 RUNTIME_LIBS=static TARGET_CPU=X64 BUILD=debug CFG=_debug
+                cd %wxwin%\build\msw && "%vcinstalldir%auxiliary\build\vcvars64.bat" && nmake /a /f makefile.vc SHARED=0 RUNTIME_LIBS=static TARGET_CPU=X64 BUILD=release CFG=_release
+            For dynamic libraries (smaller file, but need to ship libraries):
+                cd %wxwin%\build\msw && nmake /a /f makefile.vc SHARED=1 RUNTIME_LIBS=dynamic TARGET_CPU=X64 BUILD=debug CFG=_debug
+                cd %wxwin%\build\msw && nmake /a /f makefile.vc SHARED=1 RUNTIME_LIBS=dynamic BUILD=release CFG=_release
+                cd %wxwin%\build\msw && "%vcinstalldir%auxiliary\build\vcvars64.bat" && nmake /a /f makefile.vc SHARED=1 TARGET_CPU=X64 CFG=_debug
+                cd %wxwin%\build\msw && "%vcinstalldir%auxiliary\build\vcvars64.bat" && nmake /a /f makefile.vc SHARED=1 RUNTIME_LIBS=dynamic TARGET_CPU=X64 BUILD=release CFG=_release
+            NOTE:
+                The location of vcvars64.bat seems to change between visual
+                studio versions.  These instructions are written for visual
+                studio 2019.
+
+To build all:
+
+cd %wxwin%\build\msw
+nmake /a /f makefile.vc SHARED=0 RUNTIME_LIBS=static BUILD=debug CFG=_debug
+nmake /a /f makefile.vc SHARED=1 RUNTIME_LIBS=dynamic BUILD=debug CFG=_debug
+nmake /a /f makefile.vc SHARED=0 RUNTIME_LIBS=static BUILD=release CFG=_release
+nmake /a /f makefile.vc SHARED=1 RUNTIME_LIBS=dynamic BUILD=release CFG=_release
+"%vcinstalldir%auxiliary\build\vcvars64.bat"
+nmake /a /f makefile.vc SHARED=0 RUNTIME_LIBS=static TARGET_CPU=X64 BUILD=debug CFG=_debug
+nmake /a /f makefile.vc SHARED=1 RUNTIME_LIBS=dynamic TARGET_CPU=X64 BUILD=debug CFG=_debug
+nmake /a /f makefile.vc SHARED=0 RUNTIME_LIBS=static TARGET_CPU=X64 BUILD=release CFG=_release
+nmake /a /f makefile.vc SHARED=1 RUNTIME_LIBS=dynamic TARGET_CPU=X64 BUILD=release CFG=_release
+
+*/
