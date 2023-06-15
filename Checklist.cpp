@@ -1,16 +1,15 @@
 #include "Checklist.hpp"
 
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
 
 // Source: https://github.com/timsort/cpp-TimSort
 #include <gfx/timsort.hpp>
 
-using namespace std;
-
 Node::Node() {}
-Node::Node(const string &ky) : key(ky) {}
-Node::Node(const string &ky, const string &val) : key(ky), value(val) {}
+Node::Node(const std::string &ky) : key(ky) {}
+Node::Node(const std::string &ky, const std::string &val) : key(ky), value(val) {}
 
 bool Node::operator< (const Node &other) const {
 	if (key.length() < other.key.length()) return true;
@@ -59,41 +58,58 @@ bool Node::operator>= (const Node &other) const {
 };
 bool Node::operator!= (const Node &other) const { return key != other.key || value != other.value; };
 
-Checklist *Checklist::from_file(const string &fname) {
-	using namespace filesystem;
-	path fil {fname};
-	Checklist *outp = new Checklist;
-	if (!is_regular_file(fil) || !exists(fil)) return outp;
+std::shared_ptr<Checklist> Checklist::from_file(const std::string &fname) {
+	std::filesystem::path fil {fname};
+	std::shared_ptr<Checklist> outp = std::make_shared<Checklist>();
+	if (!std::filesystem::is_regular_file(fil) || !std::filesystem::exists(fil)) return outp;
 
-	ifstream infil {fil};
+	std::ifstream infil {fil};
 	if (!infil.is_open()) return nullptr;
 	
-	string key, stepkey, stepval;
+	std::string key, stepkey, stepval, stepkey_lower;
 	bool inp {};
-	vector<pair<int, string>> ws;
-	int ws_cnt;
+	std::vector<std::pair<int, std::string>> ws;
+	int ws_cnt, note_count = 0;
 
 	do {
 		ws_cnt = 0;
-		while (infil.good() && isspace(infil.peek())) {
+		while (infil.good() && std::isspace(infil.peek())) {
 			++ws_cnt;
-			// For some reason with README.md, seekg gets stuck at character 118?  Get seeks right past it though.  It looks like an issue with character 10 (\n)
+			// For some reason with README.md, seekg() gets stuck at character 118?  get() seeks right past it though.  It looks like an issue with character 10 (\n)
 			// infil.seekg(1, ios_base::cur);
 			infil.get();
 		}
 		if (!infil.good()) break;
 		infil >> stepkey;
 		if (stepkey.empty()) break;
-		while (infil.good() && isspace(infil.peek())) infil.get();
+		stepkey_lower = stepkey;
+		std::transform(stepkey_lower.begin(), stepkey_lower.end(), stepkey_lower.begin(), ::tolower);
+		if (stepkey_lower == "-note:") {
+			stepkey = "Note " + std::to_string(++note_count);
+		} else {
+			note_count = 0;
+		}
+		while (infil.good() && std::isspace(infil.peek())) infil.get();
 		if (!infil.good()) break;
-		inp = static_cast<bool>(getline(infil, stepval));
+		inp = static_cast<bool>(std::getline(infil, stepval));
 		while (!ws.empty() && ws_cnt <= ws.back().first) ws.pop_back();
 		key.clear();
-		for (pair<int, string> &it : ws) key += it.second.back() == '.' ? it.second : (it.second + '.');
-		key += stepkey;
-		Node *node = new Node {move(key), move(stepval)};
-		ws.push_back(make_pair(move(ws_cnt), move(stepkey)));
-		outp->add(node->key, node);
+		for (std::pair<int, std::string> &it : ws) key += it.second.back() == '.' ? it.second : (it.second + '.');
+		std::shared_ptr<Node> node;
+		if (stepkey_lower == "-load:") {
+			while (key.back() == '.') key.pop_back();
+			if (outp->contains(key)) {
+				node = outp->at(key);
+				node->sublist = Checklist::from_file(stepval);
+			}
+		} else {
+			key += stepkey;
+			node = std::make_shared<Node>(std::move(key), std::move(stepval));
+		}
+		if (node) {
+			ws.push_back(std::make_pair(std::move(ws_cnt), std::move(stepkey)));
+			outp->add(node->key, node);
+		}
 		stepkey.clear();
 	} while (inp && infil.good());
 
@@ -108,16 +124,16 @@ Checklist *Checklist::from_file(const string &fname) {
 	return outp;
 }
 
-Checklist &Checklist::add(string &key, Node *node) {
+Checklist &Checklist::add(std::string &key, std::shared_ptr<Node> node) {
 	while (key.back() == '.') key.pop_back();
 
-	string basekey, subkey;
+	std::string basekey, subkey;
 	size_t len = key.find('.');
-	if (len == string::npos) {
+	if (len == std::string::npos) {
 		basekey = key;
 	} else {
-		basekey = move(key.substr(0, len));
-		subkey = move(key.substr(len + 1));
+		basekey = std::move(key.substr(0, len));
+		subkey = std::move(key.substr(len + 1));
 	}
 
 	if (subkey.empty()) {
@@ -125,10 +141,10 @@ Checklist &Checklist::add(string &key, Node *node) {
 		insert_or_assign(move(basekey), node);
 	} else {
 		if (!(contains(basekey))) {
-			Node *nod = new Node(basekey, "");
+			std::shared_ptr<Node> nod = std::make_shared<Node>(basekey, "");
 			insert({basekey, nod});
 		}
-		if (!(at(basekey)->sublist)) at(basekey)->sublist = new Checklist;
+		if (!(at(basekey)->sublist)) at(basekey)->sublist = std::make_shared<Checklist>();
 		at(basekey)->sublist->add(subkey, node);
 	}
 
@@ -138,14 +154,14 @@ Checklist &Checklist::add(string &key, Node *node) {
 void Checklist::update_order() {
 	ordered_nodes.clear();
 
-	for (pair<const string, Node *> &it : *this) {
+	for (std::pair<const std::string, std::shared_ptr<Node>> &it : *this) {
 		ordered_nodes.push_back(it.second);
 		if (it.second->sublist) it.second->sublist->update_order();
 	}
 
-	gfx::timsort(ordered_nodes, [](Node *a, Node *b) {return *a < *b; });
+	std::stable_sort(ordered_nodes.begin(), ordered_nodes.end(), [](std::shared_ptr<Node> a, std::shared_ptr<Node> b) {return *a < *b; });
 }
 
-Node *Checklist::operator[] (size_t ind) {
+std::shared_ptr<Node> Checklist::operator[] (size_t ind) {
 	return ordered_nodes[ind];
 }

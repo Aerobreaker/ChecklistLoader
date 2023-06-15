@@ -28,12 +28,12 @@ protected:
     StepSizer *row_1_sizer;
     StepSizer *row_2_sizer;
     wxCheckBox* step_1_check;
-    WrappingText* step_1_label;
+    SelectableText* step_1_label;
     wxCheckBox* step_2_check;
-    WrappingText* step_2_label;
+    SelectableText* step_2_label;
     wxButton* step_2_button;
 
-    std::vector<Checklist *> lists {};
+    std::vector<std::shared_ptr<Checklist>> lists {};
     std::vector<size_t> indexes {};
 
 public:

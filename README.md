@@ -48,4 +48,3 @@ nmake /a /f makefile.vc SHARED=1 RUNTIME_LIBS=dynamic TARGET_CPU=X64 BUILD=debug
 nmake /a /f makefile.vc SHARED=0 RUNTIME_LIBS=static TARGET_CPU=X64 BUILD=release CFG=_release
 nmake /a /f makefile.vc SHARED=1 RUNTIME_LIBS=dynamic TARGET_CPU=X64 BUILD=release CFG=_release
 ```
- 2. The github repo at https://github.com/timsort/cpp-TimSort has been cloned into the same root directory as this one

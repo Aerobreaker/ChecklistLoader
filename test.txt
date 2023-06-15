@@ -17,7 +17,10 @@
 15. Test 15
 16. Test 16
 8. Test 8
+    -Load: test_loader.txt
 7. Test 7
+    -Note: this is a note
+    -Note: this is also a note
 6. Test 6
 4.	Test 4
   a. Test 4.a

@@ -23,7 +23,7 @@ void MainFrame::AdvanceList(wxCommandEvent &evt) {
     if (lists.empty()) return OnLoad(evt);
 
     size_t &cur_ind = indexes.back();
-    Checklist *cur_list = lists.back();
+    std::shared_ptr<Checklist> cur_list = lists.back();
 
     if (cur_ind >= cur_list->size()) return;
     if (cur_ind == 0) main_sizer->Show(row_1_sizer);
@@ -39,7 +39,7 @@ void MainFrame::AdvanceList(wxCommandEvent &evt) {
     } else {
         step_2_label->UpdateLabel((*cur_list)[cur_ind]->value);
         row_2_sizer->SetLabel((*cur_list)[cur_ind]->key);
-        Enable_Sub((*cur_list)[cur_ind]->sublist);
+        Enable_Sub((*cur_list)[cur_ind]->sublist != nullptr);
     }
     Resize();
 }
@@ -50,14 +50,14 @@ void MainFrame::RegressList(wxCommandEvent &evt) {
     if (lists.empty()) return OnLoad(evt);
 
     size_t &cur_ind = indexes.back();
-    Checklist *cur_list = lists.back();
+    std::shared_ptr<Checklist> cur_list = lists.back();
 
     if (cur_ind == 0) return;
     if (cur_ind > cur_list->size()) cur_ind = cur_list->size();
     if (cur_ind == cur_list->size()) main_sizer->Show(row_2_sizer);
     step_2_label->UpdateLabel((*cur_list)[--cur_ind]->value);
     row_2_sizer->SetLabel((*cur_list)[cur_ind]->key);
-    Enable_Sub((*cur_list)[cur_ind]->sublist);
+    Enable_Sub((*cur_list)[cur_ind]->sublist != nullptr);
     if (cur_ind) {
         step_1_label->UpdateLabel((*cur_list)[cur_ind - 1]->value);
         row_1_sizer->SetLabel((*cur_list)[cur_ind - 1]->key);
@@ -70,7 +70,7 @@ void MainFrame::RegressList(wxCommandEvent &evt) {
 
 void MainFrame::LoadFile(string &fname) {
     if (!lists.empty() || !indexes.empty()) UnLoad();
-    Checklist *lst = Checklist::from_file(fname);
+    std::shared_ptr<Checklist> lst = Checklist::from_file(fname);
     if (!lst) {
         wxMessageBox("Unable to create list from file!", "Checklist Loader", wxOK | wxCENTER, this);
         return;
@@ -82,7 +82,7 @@ void MainFrame::LoadFile(string &fname) {
     row_1_sizer->SetLabel('0');
     step_2_label->UpdateLabel((*lists[0])[0]->value);
     row_2_sizer->SetLabel((*lists[0])[0]->key);
-    Enable_Sub((*lists[0])[0]->sublist);
+    Enable_Sub((*lists[0])[0]->sublist != nullptr);
 
     Resize();
 }
@@ -126,7 +126,7 @@ void MainFrame::OnUnload(wxCommandEvent &evt) {
 
 void MainFrame::OnSubList(wxCommandEvent &evt) {
     size_t &cur_ind = indexes.back();
-    Checklist *cur_list = lists.back();
+    std::shared_ptr<Checklist> cur_list = lists.back();
 
     if (!((*cur_list)[cur_ind]->sublist)) return;
 
@@ -137,7 +137,7 @@ void MainFrame::OnSubList(wxCommandEvent &evt) {
     row_1_sizer->SetLabel('0');
     step_2_label->UpdateLabel((*lists.back())[0]->value);
     row_2_sizer->SetLabel((*lists.back())[0]->key);
-    Enable_Sub((*lists.back())[0]->sublist);
+    Enable_Sub((*lists.back())[0]->sublist != nullptr);
 
     main_sizer->Hide(row_1_sizer);
 
@@ -151,14 +151,18 @@ void MainFrame::OnUnSubList(wxCommandEvent &evt) {
     indexes.pop_back();
 
     size_t &cur_ind = indexes.back();
-    Checklist *cur_list = lists.back();
+    std::shared_ptr<Checklist> cur_list = lists.back();
 
-    if (cur_ind == 0) main_sizer->Hide(row_1_sizer);
+    if (cur_ind == 0) {
+        main_sizer->Hide(row_1_sizer);
+    } else {
+        main_sizer->Show(row_1_sizer);
+    }
     step_1_label->UpdateLabel(cur_ind ? (*cur_list)[cur_ind - 1]->value : deflabel);
     row_1_sizer->SetLabel(cur_ind ? (*cur_list)[cur_ind - 1]->key : "0");
     step_2_label->UpdateLabel((*cur_list)[cur_ind]->value);
     row_2_sizer->SetLabel((*cur_list)[cur_ind]->key);
-    Enable_Sub((*cur_list)[cur_ind]->sublist);
+    Enable_Sub((*cur_list)[cur_ind]->sublist != nullptr);
     
     Resize();
 }
@@ -236,14 +240,14 @@ MainFrame::MainFrame(wxWindow *parent, wxWindowID id, const wxString &title, con
     row_1_sizer = new StepSizer(wxHORIZONTAL, this, "Step 0:");
     step_1_check = new wxCheckBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0);
     row_1_sizer->Add(step_1_check, 0, wxALIGN_CENTER | wxALL, 5);
-    step_1_label = new WrappingText(this, wxID_ANY, "Please load a checklist to continue", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL);
+    step_1_label = new SelectableText(this, wxID_ANY, "Please load a checklist to continue", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL);
     row_1_sizer->Add(step_1_label, 1, wxALIGN_CENTER | wxALL, 5);
     main_sizer->Add(row_1_sizer, 1, wxEXPAND, 5);
 
     row_2_sizer = new StepSizer(wxHORIZONTAL, this, "Step 1:");
     step_2_check = new wxCheckBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0);
     row_2_sizer->Add(step_2_check, 0, wxALIGN_CENTER | wxALL, 5);
-    step_2_label = new WrappingText(this, wxID_ANY, "Please load a checklist to continue", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL);
+    step_2_label = new SelectableText(this, wxID_ANY, "Please load a checklist to continue", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL);
     row_2_sizer->Add(step_2_label, 1, wxALIGN_CENTER | wxALL, 5);
     step_2_button = new wxButton(this, wxID_ANY, "Load sub-list", wxDefaultPosition, wxDefaultSize, 0);
     row_2_sizer->Add(step_2_button, 0, wxALIGN_CENTER | wxALL, 5);
