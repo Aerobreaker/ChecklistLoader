@@ -5,6 +5,10 @@
 2.c. Test D
 2. This is a test
 3.	Test 2
+    -note: Some note here
+    -NOTE: more notes
+    1. First sub-step with notes
+    2. Second sub-step with notes
 10. Test 10
 9. Test 9
 11. Test 11

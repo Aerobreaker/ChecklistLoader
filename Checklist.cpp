@@ -4,9 +4,6 @@
 #include <filesystem>
 #include <fstream>
 
-// Source: https://github.com/timsort/cpp-TimSort
-#include <gfx/timsort.hpp>
-
 Node::Node() {}
 Node::Node(const std::string &ky) : key(ky) {}
 Node::Node(const std::string &ky, const std::string &val) : key(ky), value(val) {}
@@ -65,11 +62,11 @@ std::shared_ptr<Checklist> Checklist::from_file(const std::string &fname) {
 
 	std::ifstream infil {fil};
 	if (!infil.is_open()) return nullptr;
-	
+
 	std::string key, stepkey, stepval, stepkey_lower;
-	bool inp {};
+	bool inp{};
 	std::vector<std::pair<int, std::string>> ws;
-	int ws_cnt, note_count = 0;
+	int ws_cnt;
 
 	do {
 		ws_cnt = 0;
@@ -84,11 +81,6 @@ std::shared_ptr<Checklist> Checklist::from_file(const std::string &fname) {
 		if (stepkey.empty()) break;
 		stepkey_lower = stepkey;
 		std::transform(stepkey_lower.begin(), stepkey_lower.end(), stepkey_lower.begin(), ::tolower);
-		if (stepkey_lower == "-note:") {
-			stepkey = "Note " + std::to_string(++note_count);
-		} else {
-			note_count = 0;
-		}
 		while (infil.good() && std::isspace(infil.peek())) infil.get();
 		if (!infil.good()) break;
 		inp = static_cast<bool>(std::getline(infil, stepval));
@@ -101,6 +93,12 @@ std::shared_ptr<Checklist> Checklist::from_file(const std::string &fname) {
 			if (outp->contains(key)) {
 				node = outp->at(key);
 				node->sublist = Checklist::from_file(stepval);
+			}
+		} else if (stepkey_lower == "-note:") {
+			while (key.back() == '.') key.pop_back();
+			if (outp->contains(key)) {
+				node = outp->at(key);
+				node->notes += (node->notes.length() > 0 ? "\r\n" : "") + stepval;
 			}
 		} else {
 			key += stepkey;

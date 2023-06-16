@@ -1,6 +1,6 @@
 #include "frames.hpp"
 
-WrappingText::WrappingText(wxWindow *parent, wxWindowID id, const wxString& label, const wxPoint &pos, const wxSize &size, long style, const wxString &name) : wxStaticText(parent, id, label, pos, size, style, name) {
+WrappingText::WrappingText(wxWindow *parent, wxWindowID id, const wxString &label, const wxPoint &pos, const wxSize &size, long style, const wxString &name) : wxStaticText(parent, id, label, pos, size, style, name) {
 	shadow_label = label;
 }
 

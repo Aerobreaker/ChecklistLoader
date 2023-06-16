@@ -21,7 +21,7 @@ public:
 	void SetLabel(const wxString &label);
 };
 
-class SelectableText : public wxTextCtrl{
+class SelectableText : public wxTextCtrl {
 protected:
 	WrappingText *shadow_label;
 public:

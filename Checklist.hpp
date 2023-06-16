@@ -12,6 +12,7 @@ class Node {
 public:
 	std::string key {};
 	std::string value {};
+	std::string notes {};
 	std::shared_ptr<Checklist> sublist {};
 
 	Node();
@@ -42,7 +43,7 @@ namespace ChecklistUtil {
 
 class Checklist : public std::unordered_map<std::string, std::shared_ptr<Node>> {
 protected:
-	std::vector<std::shared_ptr<Node>> ordered_nodes {};
+	std::vector<std::shared_ptr<Node>> ordered_nodes{};
 
 public:
 	static std::shared_ptr<Checklist> from_file(const std::string &fname);

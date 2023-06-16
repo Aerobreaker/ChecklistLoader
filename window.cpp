@@ -40,6 +40,7 @@ void MainFrame::AdvanceList(wxCommandEvent &evt) {
         step_2_label->UpdateLabel((*cur_list)[cur_ind]->value);
         row_2_sizer->SetLabel((*cur_list)[cur_ind]->key);
         Enable_Sub((*cur_list)[cur_ind]->sublist != nullptr);
+        Enable_Notes((*cur_list)[cur_ind]->notes.length() > 0);
     }
     Resize();
 }
@@ -58,6 +59,7 @@ void MainFrame::RegressList(wxCommandEvent &evt) {
     step_2_label->UpdateLabel((*cur_list)[--cur_ind]->value);
     row_2_sizer->SetLabel((*cur_list)[cur_ind]->key);
     Enable_Sub((*cur_list)[cur_ind]->sublist != nullptr);
+    Enable_Notes((*cur_list)[cur_ind]->notes.length() > 0);
     if (cur_ind) {
         step_1_label->UpdateLabel((*cur_list)[cur_ind - 1]->value);
         row_1_sizer->SetLabel((*cur_list)[cur_ind - 1]->key);
@@ -83,6 +85,7 @@ void MainFrame::LoadFile(string &fname) {
     step_2_label->UpdateLabel((*lists[0])[0]->value);
     row_2_sizer->SetLabel((*lists[0])[0]->key);
     Enable_Sub((*lists[0])[0]->sublist != nullptr);
+    Enable_Notes((*lists[0])[0]->notes.length() > 0);
 
     Resize();
 }
@@ -116,6 +119,7 @@ void MainFrame::UnLoad() {
     main_sizer->Hide(row_1_sizer);
     main_sizer->Show(row_2_sizer);
     Enable_Sub(false);
+    Enable_Notes(false);
 
     Resize();
 }
@@ -138,6 +142,7 @@ void MainFrame::OnSubList(wxCommandEvent &evt) {
     step_2_label->UpdateLabel((*lists.back())[0]->value);
     row_2_sizer->SetLabel((*lists.back())[0]->key);
     Enable_Sub((*lists.back())[0]->sublist != nullptr);
+    Enable_Notes((*lists.back())[0]->notes.length() > 0);
 
     main_sizer->Hide(row_1_sizer);
 
@@ -163,7 +168,43 @@ void MainFrame::OnUnSubList(wxCommandEvent &evt) {
     step_2_label->UpdateLabel((*cur_list)[cur_ind]->value);
     row_2_sizer->SetLabel((*cur_list)[cur_ind]->key);
     Enable_Sub((*cur_list)[cur_ind]->sublist != nullptr);
+    Enable_Notes((*cur_list)[cur_ind]->notes.length() > 0);
     
+    Resize();
+}
+
+void MainFrame::OnNotes(wxCommandEvent &evt) {
+    size_t &cur_ind = indexes.back();
+    std::shared_ptr<Checklist> cur_list = lists.back();
+
+    if ((*cur_list)[cur_ind]->notes.length() < 1) return;
+
+    main_sizer->Hide(row_1_sizer);
+    main_sizer->Hide(row_2_sizer);
+    main_sizer->Show(row_3_sizer);
+
+    notes_label->UpdateLabel((*cur_list)[cur_ind]->notes);
+    row_3_sizer->SetLabel((*cur_list)[cur_ind]->key + " Notes");
+    
+    Resize();
+}
+
+void MainFrame::OnUnNotes(wxCommandEvent &evt) {
+    size_t &cur_ind = indexes.back();
+    std::shared_ptr<Checklist> cur_list = lists.back();
+
+    if (cur_ind == 0) {
+        main_sizer->Hide(row_1_sizer);
+    } else {
+        main_sizer->Show(row_1_sizer);
+    }
+    main_sizer->Show(row_2_sizer);
+    main_sizer->Hide(row_3_sizer);
+    notes_label->UpdateLabel(wxEmptyString);
+    row_3_sizer->SetLabel(wxEmptyString);
+    Enable_Sub((*cur_list)[cur_ind]->sublist != nullptr);
+    Enable_Notes((*cur_list)[cur_ind]->notes.length() > 0);
+
     Resize();
 }
 
@@ -245,18 +286,31 @@ MainFrame::MainFrame(wxWindow *parent, wxWindowID id, const wxString &title, con
     main_sizer->Add(row_1_sizer, 1, wxEXPAND, 5);
 
     row_2_sizer = new StepSizer(wxHORIZONTAL, this, "Step 1:");
+    button_sizer = new wxBoxSizer(wxVERTICAL);
     step_2_check = new wxCheckBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0);
     row_2_sizer->Add(step_2_check, 0, wxALIGN_CENTER | wxALL, 5);
     step_2_label = new SelectableText(this, wxID_ANY, "Please load a checklist to continue", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL);
     row_2_sizer->Add(step_2_label, 1, wxALIGN_CENTER | wxALL, 5);
     step_2_button = new wxButton(this, wxID_ANY, "Load sub-list", wxDefaultPosition, wxDefaultSize, 0);
-    row_2_sizer->Add(step_2_button, 0, wxALIGN_CENTER | wxALL, 5);
+    button_sizer->Add(step_2_button, 0, wxALIGN_CENTER | wxALL, 5);
+    notes_button = new wxButton(this, wxID_ANY, "Show notes", wxDefaultPosition, wxDefaultSize, 0);
+    button_sizer->Add(notes_button, 0, wxALIGN_CENTER | wxALL, 5);
+    row_2_sizer->Add(button_sizer, 0, wxALIGN_CENTER | wxALL, 5);
     main_sizer->Add(row_2_sizer, 1, wxEXPAND, 5);
+
+    row_3_sizer = new StepSizer(wxVERTICAL, this, "Notes:");
+    notes_label = new SelectableText(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL | wxTE_MULTILINE);
+    row_3_sizer->Add(notes_label, 1, wxALL | wxEXPAND, 5);
+    un_notes_button = new wxButton(this, wxID_ANY, "Return to checklist", wxDefaultPosition, wxDefaultSize, 0);
+    row_3_sizer->Add(un_notes_button, 0, wxALIGN_RIGHT | wxALL, 5);
+    main_sizer->Add(row_3_sizer, 1, wxEXPAND, 5);
 
     Bind(wxEVT_SIZE, &MainFrame::OnSize, this);
     step_1_check->Bind(wxEVT_CHECKBOX, &MainFrame::RegressList, this);
     step_2_check->Bind(wxEVT_CHECKBOX, &MainFrame::AdvanceList, this);
     step_2_button->Bind(wxEVT_BUTTON, &MainFrame::OnSubList, this);
+    notes_button->Bind(wxEVT_BUTTON, &MainFrame::OnNotes, this);
+    un_notes_button->Bind(wxEVT_BUTTON, &MainFrame::OnUnNotes, this);
     Bind(wxEVT_MENU, &MainFrame::OnStayTop, this, ID_OnTop);
     Bind(wxEVT_MENU, &MainFrame::OnLoad, this, ID_Load);
     Bind(wxEVT_MENU, &MainFrame::OnUnload, this, ID_Unload);
@@ -269,18 +323,24 @@ MainFrame::MainFrame(wxWindow *parent, wxWindowID id, const wxString &title, con
     step_1_check->SetValue(true);
     main_sizer->Hide(row_1_sizer);
     main_sizer->Show(row_2_sizer);
+    main_sizer->Hide(row_3_sizer);
     Layout();
     SetMinSize(GetBestSize());
     SetSize(GetMinSize());
     Enable_Sub(false);
+    Enable_Notes(false);
 
     Centre(wxBOTH);
 }
 
 void MainFrame::Enable_Sub(bool enabled) {
-    row_2_sizer->Show(step_2_button, enabled);
+    button_sizer->Show(step_2_button, enabled);
     load_sub->Enable(enabled);
     unload_sub->Enable(lists.size() > 1);
+}
+
+void MainFrame::Enable_Notes(bool enabled) {
+    button_sizer->Show(notes_button, enabled);
 }
 
 void MainFrame::OnSize(wxSizeEvent &evt) {
@@ -304,7 +364,7 @@ void MainFrame::Resize() {
     * ow*nh=na
     * tw*th=na
     * ow/oh=tw/th
-    * 
+    *
     * tw=ow*th/oh
     * ow*th^2/oh=na
     * th^2=na*oh/ow
