@@ -299,7 +299,7 @@ MainFrame::MainFrame(wxWindow *parent, wxWindowID id, const wxString &title, con
     main_sizer->Add(row_2_sizer, 1, wxEXPAND, 5);
 
     row_3_sizer = new StepSizer(wxVERTICAL, this, "Notes:");
-    notes_label = new SelectableText(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL | wxTE_MULTILINE);
+    notes_label = new SelectableText(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
     row_3_sizer->Add(notes_label, 1, wxALL | wxEXPAND, 5);
     un_notes_button = new wxButton(this, wxID_ANY, "Return to checklist", wxDefaultPosition, wxDefaultSize, 0);
     row_3_sizer->Add(un_notes_button, 0, wxALIGN_RIGHT | wxALL, 5);
