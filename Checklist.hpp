@@ -48,7 +48,10 @@ protected:
 public:
 	static std::shared_ptr<Checklist> from_file(const std::string &fname);
 	Checklist &add(std::string &key, std::shared_ptr<Node> node);
+	bool has(std::string &key);
+	std::shared_ptr<Node> get(std::string &key);
 	void update_order();
+	std::vector<std::shared_ptr<Node>> all_nodes();
 
 	std::shared_ptr<Node> operator[] (size_t ind);
 };

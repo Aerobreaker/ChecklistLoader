@@ -89,15 +89,19 @@ std::shared_ptr<Checklist> Checklist::from_file(const std::string &fname) {
 		for (std::pair<int, std::string> &it : ws) key += it.second.back() == '.' ? it.second : (it.second + '.');
 		std::shared_ptr<Node> node;
 		if (stepkey_lower == "-load:") {
-			while (key.back() == '.') key.pop_back();
-			if (outp->contains(key)) {
-				node = outp->at(key);
-				node->sublist = Checklist::from_file(stepval);
+			if (outp->has(key)) {
+				node = outp->get(key);
+				if (key.back() != '.') key.push_back('.');
+				std::shared_ptr<Checklist> sub_list = Checklist::from_file(stepval);
+				std::vector<std::shared_ptr<Node>> sub_nodes = sub_list->all_nodes();
+				for (std::shared_ptr<Node> &it : sub_nodes) {
+					it->key = key + it->key;
+					outp->add(it->key, it);
+				}
 			}
 		} else if (stepkey_lower == "-note:") {
-			while (key.back() == '.') key.pop_back();
-			if (outp->contains(key)) {
-				node = outp->at(key);
+			if (outp->has(key)) {
+				node = outp->get(key);
 				node->notes += (node->notes.length() > 0 ? "\r\n" : "") + stepval;
 			}
 		} else {
@@ -149,6 +153,43 @@ Checklist &Checklist::add(std::string &key, std::shared_ptr<Node> node) {
 	return *this;
 }
 
+bool Checklist::has(std::string &key) {
+	while (key.back() == '.') key.pop_back();
+
+	std::string basekey, subkey;
+	size_t len = key.find('.');
+	if (len == std::string::npos) {
+		basekey = key;
+	} else {
+		basekey = std::move(key.substr(0, len));
+		subkey = std::move(key.substr(len + 1));
+	}
+
+	if (subkey.empty()) return contains(basekey);
+
+	if (!contains(basekey)) return false;
+	std::shared_ptr<Node> node = at(basekey);
+	if (node->sublist == nullptr) return false;
+	return node->sublist->has(subkey);
+}
+
+std::shared_ptr<Node> Checklist::get(std::string &key) {
+	while (key.back() == '.') key.pop_back();
+
+	std::string basekey, subkey;
+	size_t len = key.find('.');
+	if (len == std::string::npos) {
+		basekey = key;
+	} else {
+		basekey = std::move(key.substr(0, len));
+		subkey = std::move(key.substr(len + 1));
+	}
+
+	if (subkey.empty()) return at(basekey);
+
+	return at(basekey)->sublist->get(subkey);
+}
+
 void Checklist::update_order() {
 	ordered_nodes.clear();
 
@@ -158,6 +199,17 @@ void Checklist::update_order() {
 	}
 
 	std::stable_sort(ordered_nodes.begin(), ordered_nodes.end(), [](std::shared_ptr<Node> a, std::shared_ptr<Node> b) {return *a < *b; });
+}
+
+std::vector<std::shared_ptr<Node>> Checklist::all_nodes() {
+	std::vector<std::shared_ptr<Node>> outp;
+
+	for (std::pair<const std::string, std::shared_ptr<Node>> &it : *this) {
+		outp.push_back(it.second);
+		if (it.second->sublist != nullptr) outp.append_range(it.second->sublist->all_nodes());
+	}
+
+	return outp;
 }
 
 std::shared_ptr<Node> Checklist::operator[] (size_t ind) {
