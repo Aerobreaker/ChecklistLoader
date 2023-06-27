@@ -6,7 +6,6 @@
 
 #include <cmath>
 
-using namespace std;
 constexpr char deflabel[36] = "Please load a checklist to continue";
 
 enum {
@@ -70,7 +69,7 @@ void MainFrame::RegressList(wxCommandEvent &evt) {
     Resize();
 }
 
-void MainFrame::LoadFile(string &fname) {
+void MainFrame::LoadFile(std::string &fname) {
     if (!lists.empty() || !indexes.empty()) UnLoad();
     std::shared_ptr<Checklist> lst = Checklist::from_file(fname);
     if (!lst) {
@@ -91,7 +90,7 @@ void MainFrame::LoadFile(string &fname) {
 }
 
 void MainFrame::LoadFile(wxString &fname) {
-    string tmp = move(fname.ToStdString());
+    std::string tmp = std::move(fname.ToStdString());
     return LoadFile(tmp);
 }
 
@@ -100,7 +99,7 @@ void MainFrame::OnLoad(wxCommandEvent &evt) {
 
     if (openFile.ShowModal() == wxID_CANCEL) return;
 
-    string fname = openFile.GetPath().ToStdString();
+    std::string fname = openFile.GetPath().ToStdString();
     LoadFile(fname);
 }
 
@@ -118,8 +117,10 @@ void MainFrame::UnLoad() {
 
     main_sizer->Hide(row_1_sizer);
     main_sizer->Show(row_2_sizer);
+    main_sizer->Hide(row_3_sizer);
     Enable_Sub(false);
     Enable_Notes(false);
+    SetSize(GetMinSize());
 
     Resize();
 }
@@ -151,6 +152,8 @@ void MainFrame::OnSubList(wxCommandEvent &evt) {
 
 void MainFrame::OnUnSubList(wxCommandEvent &evt) {
     if (lists.size() < 2) return;
+
+    OnUnNotes(evt);
 
     lists.pop_back();
     indexes.pop_back();
@@ -319,16 +322,18 @@ MainFrame::MainFrame(wxWindow *parent, wxWindowID id, const wxString &title, con
     Bind(wxEVT_MENU, &MainFrame::OnExit, this, wxID_EXIT);
 
     SetSizer(main_sizer);
+    // Wrap and show/hide rows so that Layout gets the right size here
     step_2_label->Wrap(-1);
-    step_1_check->SetValue(true);
     main_sizer->Hide(row_1_sizer);
     main_sizer->Show(row_2_sizer);
     main_sizer->Hide(row_3_sizer);
+    // Layout so that the best size gets updated
     Layout();
+    // Set the minimum size to the best size with nothing displayed
     SetMinSize(GetBestSize());
-    SetSize(GetMinSize());
-    Enable_Sub(false);
-    Enable_Notes(false);
+
+    // Now do the rest of the setup that happens when no list is loaded
+    UnLoad();
 
     Centre(wxBOTH);
 }
@@ -359,7 +364,7 @@ void MainFrame::Resize() {
     wxSize bst_size = GetBestSize();
     /* Scale the size to meet the new area while maintaining aspect ratio
     * New width and height might be off by a couple pixels due to rounding
-    * ow=old_wid, oh=old_hgt, nh=new_hgt, tw=target_wid, th=target_h, oa=old_area, na=new_area
+    * ow=old_wid, oh=old_hgt, nh=new_hgt, tw=target_wid, th=target_hgt, oa=old_area, na=new_area
     * ow*oh=oa
     * ow*nh=na
     * tw*th=na
@@ -372,8 +377,8 @@ void MainFrame::Resize() {
     */
     int old_wid = cur_size.GetWidth();
     int old_hgt = cur_size.GetHeight();
-    int new_wid = max(bst_size.GetWidth(), old_wid);
-    int new_hgt = max(bst_size.GetHeight(), old_hgt);
+    int new_wid = std::max(bst_size.GetWidth(), old_wid);
+    int new_hgt = std::max(bst_size.GetHeight(), old_hgt);
     // This is here to prevent an infinite resizing loop
     unsigned char cnt = 0;
     // Repeat resizing until size doesn't change
@@ -381,8 +386,8 @@ void MainFrame::Resize() {
         // Cast the ints to double to widen before multiplying and dividing to reduce loss of information
         new_hgt = static_cast<int>(ceil(sqrt(static_cast<double>(new_hgt) * static_cast<double>(old_hgt))));
         new_wid = static_cast<int>(ceil(static_cast<double>(old_wid) * static_cast<double>(new_hgt) / static_cast<double>(old_hgt)));
-        bst_size.SetWidth(max(old_wid, new_wid));
-        bst_size.SetHeight(max(old_hgt, new_hgt));
+        bst_size.SetWidth(std::max(old_wid, new_wid));
+        bst_size.SetHeight(std::max(old_hgt, new_hgt));
         SetSize(bst_size);
         // Re-wrap after resizing
         Layout();
@@ -391,8 +396,8 @@ void MainFrame::Resize() {
         bst_size = GetBestSize();
         old_wid = new_wid;
         old_hgt = new_hgt;
-        new_wid = max(bst_size.GetWidth(), old_wid);
-        new_hgt = max(bst_size.GetHeight(), old_hgt);
+        new_wid = std::max(bst_size.GetWidth(), old_wid);
+        new_hgt = std::max(bst_size.GetHeight(), old_hgt);
     }
     Refresh();
     // For some reason, on the next drawing cycle, sometimes the static texts won't be rendered in the vertical center of their horizontal sizer (despite having wxEXPAND set)

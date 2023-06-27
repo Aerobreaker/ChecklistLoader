@@ -3,8 +3,6 @@
 #include <wx/app.h>
 #include <wx/cmdline.h>
 
-#include <string>
-
 /*
 * Todo:
 * 1. Create icons for toolbar items, add toolbar items to main window
