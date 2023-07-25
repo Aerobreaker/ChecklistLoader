@@ -130,6 +130,8 @@ void MainFrame::OnUnload(wxCommandEvent &evt) {
 }
 
 void MainFrame::OnSubList(wxCommandEvent &evt) {
+    OnUnNotes(evt);
+
     size_t &cur_ind = indexes.back();
     std::shared_ptr<Checklist> cur_list = lists.back();
 
@@ -153,8 +155,6 @@ void MainFrame::OnSubList(wxCommandEvent &evt) {
 void MainFrame::OnUnSubList(wxCommandEvent &evt) {
     if (lists.size() < 2) return;
 
-    OnUnNotes(evt);
-
     lists.pop_back();
     indexes.pop_back();
 
@@ -172,7 +172,9 @@ void MainFrame::OnUnSubList(wxCommandEvent &evt) {
     row_2_sizer->SetLabel((*cur_list)[cur_ind]->key);
     Enable_Sub((*cur_list)[cur_ind]->sublist != nullptr);
     Enable_Notes((*cur_list)[cur_ind]->notes.length() > 0);
-    
+
+    OnUnNotes(evt);
+
     Resize();
 }
 
