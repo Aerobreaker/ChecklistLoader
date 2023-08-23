@@ -286,7 +286,7 @@ MainFrame::MainFrame(wxWindow *parent, wxWindowID id, const wxString &title, con
     row_1_sizer = new StepSizer(wxHORIZONTAL, this, "Step 0:");
     step_1_check = new wxCheckBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0);
     row_1_sizer->Add(step_1_check, 0, wxALIGN_CENTER | wxALL, 5);
-    step_1_label = new SelectableText(this, wxID_ANY, "Please load a checklist to continue", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL);
+    step_1_label = new SelectableText(this, wxID_ANY, "Please load a checklist to continue", wxALIGN_CENTER_HORIZONTAL);
     row_1_sizer->Add(step_1_label, 1, wxALIGN_CENTER | wxALL, 5);
     main_sizer->Add(row_1_sizer, 1, wxEXPAND, 5);
 
@@ -294,7 +294,7 @@ MainFrame::MainFrame(wxWindow *parent, wxWindowID id, const wxString &title, con
     button_sizer = new wxBoxSizer(wxVERTICAL);
     step_2_check = new wxCheckBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0);
     row_2_sizer->Add(step_2_check, 0, wxALIGN_CENTER | wxALL, 5);
-    step_2_label = new SelectableText(this, wxID_ANY, "Please load a checklist to continue", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL);
+    step_2_label = new SelectableText(this, wxID_ANY, "Please load a checklist to continue", wxALIGN_CENTER_HORIZONTAL);
     row_2_sizer->Add(step_2_label, 1, wxALIGN_CENTER | wxALL, 5);
     step_2_button = new wxButton(this, wxID_ANY, "Load sub-list", wxDefaultPosition, wxDefaultSize, 0);
     button_sizer->Add(step_2_button, 0, wxALIGN_CENTER | wxALL, 5);
@@ -304,7 +304,8 @@ MainFrame::MainFrame(wxWindow *parent, wxWindowID id, const wxString &title, con
     main_sizer->Add(row_2_sizer, 1, wxEXPAND, 5);
 
     row_3_sizer = new StepSizer(wxVERTICAL, this, "Notes:");
-    notes_label = new SelectableText(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
+    notes_label = new SelectableText(this, wxID_ANY, wxEmptyString, wxTE_MULTILINE, true);
+    notes_label->SetFont(wxFont(wxFontInfo().Family(wxFONTFAMILY_TELETYPE)));
     row_3_sizer->Add(notes_label, 1, wxALL | wxEXPAND, 5);
     un_notes_button = new wxButton(this, wxID_ANY, "Return to checklist", wxDefaultPosition, wxDefaultSize, 0);
     row_3_sizer->Add(un_notes_button, 0, wxALIGN_RIGHT | wxALL, 5);

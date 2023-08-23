@@ -1,6 +1,6 @@
 #include "frames.hpp"
 
-WrappingText::WrappingText(wxWindow *parent, wxWindowID id, const wxString &label, const wxPoint &pos, const wxSize &size, long style, const wxString &name) : wxStaticText(parent, id, label, pos, size, style, name) {
+WrappingText::WrappingText(wxWindow *parent, wxWindowID id, const wxString &label, long style, const wxPoint &pos, const wxSize &size, const wxString &name) : wxStaticText(parent, id, label, pos, size, style, name) {
 	shadow_label = label;
 }
 
@@ -22,11 +22,15 @@ void StepSizer::SetLabel(const wxString &label) {
 	GetStaticBox()->SetLabel("Step " + label + ":");
 }
 
-SelectableText::SelectableText(wxWindow *parent, wxWindowID id, const wxString &text, const wxPoint &pos, const wxSize &size, long style, const wxString &name, const wxValidator &validator) : wxTextCtrl(parent, id, text, pos, size, style | wxTE_READONLY | wxBORDER_NONE, validator, name) {
-	shadow_label = new WrappingText(parent, id, text, pos, size, style, name);
+SelectableText::SelectableText(wxWindow *parent, wxWindowID id, const wxString &text, long style, bool monospace, const wxPoint &pos, const wxSize &size, const wxString &name, const wxValidator &validator) : wxTextCtrl(parent, id, text, pos, size, style | wxTE_READONLY | wxBORDER_NONE, validator, name) {
+	shadow_label = new WrappingText(parent, id, text, style, pos, size, name);
 	shadow_label->Hide();
 	SetSize(shadow_label->GetSize());
-	SetFont(parent->GetFont());
+	wxFont font = parent->GetFont();
+	if (monospace && !font.IsFixedWidth()) {
+		font.SetFamily(wxFONTFAMILY_TELETYPE);
+	}
+	SetFont(font);
 	SetForegroundColour(parent->GetForegroundColour());
 	SetBackgroundColour(parent->GetBackgroundColour());
 }
