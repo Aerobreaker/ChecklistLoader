@@ -1,5 +1,7 @@
 #include "window.hpp"
 #include "Checklist.hpp"
+#include "resource.h"
+#include "global.hpp"
 
 #include <wx/filedlg.h>
 #include <wx/msgdlg.h>
@@ -227,6 +229,10 @@ void MainFrame::OnStayTop(wxCommandEvent &evt) {
 
 MainFrame::MainFrame(wxWindow *parent, wxWindowID id, const wxString &title, const wxPoint &pos, const wxSize &size, long style) : wxFrame(parent, id, title, pos, size, style) {
     SetSizeHints(wxDefaultSize, wxDefaultSize);
+    wxIconBundle icons = wxICONBUNDLE(IDI_APPICON);
+    if (icons.IsOk()) {
+        SetIcons(icons);
+    }
 
     /*Menu accelerators:
     * F - File menu

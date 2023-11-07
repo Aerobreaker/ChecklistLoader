@@ -31,6 +31,7 @@ static const wxCmdLineEntryDesc cmd_line_opts[] = {
 };
 
 bool MyApp::OnInit() {
+    wxInitAllImageHandlers();
     if (!wxApp::OnInit()) return false;
     frm = new MainFrame(NULL, wxID_ANY, "Checklist Loader", wxPoint(50, 50), wxSize(232, 85));
     if (!frm) return false;
