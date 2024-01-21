@@ -1,6 +1,7 @@
 #include "Checklist.hpp"
 
 #include <algorithm>
+#include <deque>
 #include <filesystem>
 #include <fstream>
 
@@ -203,14 +204,18 @@ void Checklist::update_order() {
 
 std::vector<std::shared_ptr<Node>> Checklist::all_nodes() {
 	std::vector<std::shared_ptr<Node>> outp;
+	std::deque<Checklist *> lists;
+	lists.push_back(this);
 
-	for (std::pair<const std::string, std::shared_ptr<Node>> &it : *this) {
-		outp.push_back(it.second);
-		if (it.second->sublist != nullptr) {
-			for (const auto &item : it.second->sublist->all_nodes()) {
-				outp.push_back(item);
-			}
-			//outp.append_range(it.second->sublist->all_nodes());
+	while (!lists.empty()) {
+		Checklist *list = lists.front();
+		lists.pop_front();
+		if (!list) {
+			continue;
+		}
+		for (auto &[key, node] : *list) {
+			outp.push_back(node);
+			lists.push_front(node->sublist.get());
 		}
 	}
 

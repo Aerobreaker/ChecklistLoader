@@ -18,6 +18,8 @@ enum {
     ID_Unload_Sub
 };
 
+constexpr int default_border = 5;
+
 void MainFrame::AdvanceList(wxCommandEvent &evt) {
     step_2_check->SetValue(false);
 
@@ -229,7 +231,7 @@ void MainFrame::OnStayTop(wxCommandEvent &evt) {
 
 MainFrame::MainFrame(wxWindow *parent, wxWindowID id, const wxString &title, const wxPoint &pos, const wxSize &size, long style) : wxFrame(parent, id, title, pos, size, style) {
     SetSizeHints(wxDefaultSize, wxDefaultSize);
-    wxIconBundle icons = wxICONBUNDLE(IDI_APPICON);
+    wxIconBundle icons = ICON_BUNDLE;
     if (icons.IsOk()) {
         SetIcons(icons);
     }
@@ -289,33 +291,39 @@ MainFrame::MainFrame(wxWindow *parent, wxWindowID id, const wxString &title, con
 
     main_sizer = new wxBoxSizer(wxVERTICAL);
 
+#ifdef _WINDOWS
+    constexpr int sizer_flags = wxEXPAND;
+#else
+    constexpr int sizer_flags = wxALL | wxEXPAND;
+#endif // _WINDOWS
+
     row_1_sizer = new StepSizer(wxHORIZONTAL, this, "Step 0:");
     step_1_check = new wxCheckBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0);
-    row_1_sizer->Add(step_1_check, 0, wxALIGN_CENTER | wxALL, 5);
+    row_1_sizer->Add(step_1_check, 0, wxALIGN_CENTER | wxALL, default_border);
     step_1_label = new SelectableText(this, wxID_ANY, "Please load a checklist to continue", wxALIGN_CENTER_HORIZONTAL);
-    row_1_sizer->Add(step_1_label, 1, wxALIGN_CENTER | wxALL, 5);
-    main_sizer->Add(row_1_sizer, 1, wxEXPAND, 5);
+    row_1_sizer->Add(step_1_label, 1, wxALIGN_CENTER | wxALL, default_border);
+    main_sizer->Add(row_1_sizer, 1, sizer_flags, default_border);
 
     row_2_sizer = new StepSizer(wxHORIZONTAL, this, "Step 1:");
     button_sizer = new wxBoxSizer(wxVERTICAL);
     step_2_check = new wxCheckBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0);
-    row_2_sizer->Add(step_2_check, 0, wxALIGN_CENTER | wxALL, 5);
+    row_2_sizer->Add(step_2_check, 0, wxALIGN_CENTER | wxALL, default_border);
     step_2_label = new SelectableText(this, wxID_ANY, "Please load a checklist to continue", wxALIGN_CENTER_HORIZONTAL);
-    row_2_sizer->Add(step_2_label, 1, wxALIGN_CENTER | wxALL, 5);
+    row_2_sizer->Add(step_2_label, 1, wxALIGN_CENTER | wxALL, default_border);
     step_2_button = new wxButton(this, wxID_ANY, "Load sub-list", wxDefaultPosition, wxDefaultSize, 0);
-    button_sizer->Add(step_2_button, 0, wxALIGN_CENTER | wxALL, 5);
+    button_sizer->Add(step_2_button, 0, wxALIGN_CENTER | wxALL, default_border);
     notes_button = new wxButton(this, wxID_ANY, "Show notes", wxDefaultPosition, wxDefaultSize, 0);
-    button_sizer->Add(notes_button, 0, wxALIGN_CENTER | wxALL, 5);
-    row_2_sizer->Add(button_sizer, 0, wxALIGN_CENTER | wxALL, 5);
-    main_sizer->Add(row_2_sizer, 1, wxEXPAND, 5);
+    button_sizer->Add(notes_button, 0, wxALIGN_CENTER | wxALL, default_border);
+    row_2_sizer->Add(button_sizer, 0, wxALIGN_CENTER | wxALL, default_border);
+    main_sizer->Add(row_2_sizer, 1, sizer_flags, default_border);
 
     row_3_sizer = new StepSizer(wxVERTICAL, this, "Notes:");
     notes_label = new SelectableText(this, wxID_ANY, wxEmptyString, wxTE_MULTILINE, true);
     notes_label->SetFont(wxFont(wxFontInfo().Family(wxFONTFAMILY_TELETYPE)));
-    row_3_sizer->Add(notes_label, 1, wxALL | wxEXPAND, 5);
+    row_3_sizer->Add(notes_label, 1, wxALL | wxEXPAND, default_border);
     un_notes_button = new wxButton(this, wxID_ANY, "Return to checklist", wxDefaultPosition, wxDefaultSize, 0);
-    row_3_sizer->Add(un_notes_button, 0, wxALIGN_RIGHT | wxALL, 5);
-    main_sizer->Add(row_3_sizer, 1, wxEXPAND, 5);
+    row_3_sizer->Add(un_notes_button, 0, wxALIGN_RIGHT | wxALL, default_border);
+    main_sizer->Add(row_3_sizer, 1, sizer_flags, default_border);
 
     Bind(wxEVT_SIZE, &MainFrame::OnSize, this);
     step_1_check->Bind(wxEVT_CHECKBOX, &MainFrame::RegressList, this);
