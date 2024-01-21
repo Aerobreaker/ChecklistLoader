@@ -206,7 +206,12 @@ std::vector<std::shared_ptr<Node>> Checklist::all_nodes() {
 
 	for (std::pair<const std::string, std::shared_ptr<Node>> &it : *this) {
 		outp.push_back(it.second);
-		if (it.second->sublist != nullptr) outp.append_range(it.second->sublist->all_nodes());
+		if (it.second->sublist != nullptr) {
+			for (const auto &item : it.second->sublist->all_nodes()) {
+				outp.push_back(item);
+			}
+			//outp.append_range(it.second->sublist->all_nodes());
+		}
 	}
 
 	return outp;
