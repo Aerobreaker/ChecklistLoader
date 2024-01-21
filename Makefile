@@ -3,7 +3,7 @@ WX_CONFIG := wx-config
 WX_LIBS := $(shell ${WX_CONFIG} --libs)
 WX_CXXFLAGS := $(shell ${WX_CONFIG} --cxxflags)
 
-CXXFLAGS := -std=gnu++2b -g -D SOURCE_DIRECTORY=$(abspath ${CURDIR})
+CXXFLAGS := -std=gnu++2b -Wall -g -D SOURCE_DIRECTORY="$(abspath ${CURDIR})"
 
 INT_DIR := bld
 BIN_DIR := bin

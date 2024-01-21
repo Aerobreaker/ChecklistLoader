@@ -192,7 +192,7 @@ void MainFrame::OnNotes(wxCommandEvent &evt) {
 
     notes_label->UpdateLabel((*cur_list)[cur_ind]->notes);
     row_3_sizer->SetLabel((*cur_list)[cur_ind]->key + " Notes");
-    
+
     Resize();
 }
 
@@ -232,7 +232,8 @@ MainFrame::MainFrame(wxWindow *parent, wxWindowID id, const wxString &title, con
 #ifdef _WINDOWS
     wxIconBundle icons = wxIconBundle(wxString::Format("#%d", IDI_APPICON), 0);
 #else
-    wxIconBundle icons = wxIconBundle(wxString(SOURCE_DIRECTORY) + "icon.ico", wxBITMAP_TYPE_ICO);
+#define STRINGIFY(X) #X
+    wxIconBundle icons = wxIconBundle(wxString(STRINGIFY(SOURCE_DIRECTORY)) + "icon.ico");
 #endif // _WINDOWS
     if (icons.IsOk()) {
         SetIcons(icons);
@@ -296,7 +297,9 @@ MainFrame::MainFrame(wxWindow *parent, wxWindowID id, const wxString &title, con
 #ifdef _WINDOWS
     constexpr int sizer_flags = wxEXPAND;
 #else
-    constexpr int sizer_flags = wxALL | wxEXPAND;
+    constexpr int all_flag = wxALL;
+    constexpr int expand_flag = wxEXPAND;
+    constexpr int sizer_flags = all_flag | expand_flag;
 #endif // _WINDOWS
 
     row_1_sizer = new StepSizer(wxHORIZONTAL, this, "Step 0:");
