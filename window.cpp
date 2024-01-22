@@ -4,7 +4,9 @@
 
 #include <wx/filedlg.h>
 #include <wx/msgdlg.h>
-
+#ifndef _WINDOWS
+#include <filesystem>
+#endif // _WINDOWS
 #include <cmath>
 
 constexpr char DEFAULT_LABEL[36] = "Please load a checklist to continue";
@@ -92,7 +94,7 @@ void MainFrame::LoadFile(std::string &fname) {
 }
 
 void MainFrame::LoadFile(wxString &fname) {
-    std::string tmp = std::move(fname.ToStdString());
+    std::string tmp = fname.ToStdString();
     return LoadFile(tmp);
 }
 
@@ -232,8 +234,10 @@ MainFrame::MainFrame(wxWindow *parent, wxWindowID id, const wxString &title, con
 #ifdef _WINDOWS
     wxIconBundle icons = wxIconBundle(wxString::Format("#%d", IDI_APPICON), 0);
 #else
-#define STRINGIFY(X) #X
-    wxIconBundle icons = wxIconBundle(wxString(STRINGIFY(SOURCE_DIRECTORY)) + "icon.ico");
+#define STRINGIZE(tok) #tok
+#define STR(tok) STRINGIZE(tok)
+    constexpr char icon_fname[] = "icon_32.png";
+    wxIconBundle icons = wxIconBundle((std::filesystem::path(STR(SOURCE_DIR)) / icon_fname).string());
 #endif // _WINDOWS
     if (icons.IsOk()) {
         SetIcons(icons);

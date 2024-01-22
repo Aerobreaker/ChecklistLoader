@@ -3,7 +3,7 @@ WX_CONFIG := wx-config
 WX_LIBS := $(shell ${WX_CONFIG} --libs)
 WX_CXXFLAGS := $(shell ${WX_CONFIG} --cxxflags)
 
-CXXFLAGS := -std=gnu++2b -Wall -g -D SOURCE_DIRECTORY="$(abspath ${CURDIR})"
+CXXFLAGS := -std=c++20 -Wall -O2 -g -DSOURCE_DIR="$(abspath ${CURDIR})"
 
 INT_DIR := bld
 BIN_DIR := bin
@@ -29,5 +29,5 @@ ${INT_DIR}:
 
 .PHONY: clean
 clean:
-	@rm -f ${BIN_DIR}/loader $(wildcard ${INT_DIR}/*.o)
+	rm -f ${BIN_DIR}/loader $(wildcard ${INT_DIR}/*.o)
 
