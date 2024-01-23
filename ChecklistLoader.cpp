@@ -5,9 +5,6 @@
 
 /*
 * Todo:
-* 0. Modify the icon loading stuff to actually work on linux
-*    Currently, the binary compiles and executes but errors out
-*    immediately trying to set the toolbar icon
 * 1. Create icons for toolbar items, add toolbar items to main window
 * 2. Create options menu to save stay-on-top state and size (?)
 */
@@ -19,9 +16,14 @@ class MyApp : public wxApp {
     wxString fname;
     bool ontop;
 public:
+    MyApp() : frm(nullptr), fname(""), ontop(false) {};
     virtual bool OnInit();
     virtual void OnInitCmdLine(wxCmdLineParser &parser);
     virtual bool OnCmdLineParsed(wxCmdLineParser &parser);
+    MyApp(MyApp &) = delete;
+    MyApp(MyApp &&) = delete;
+    MyApp operator=(MyApp) = delete;
+    MyApp &operator=(MyApp &) = delete;
 };
 
 wxIMPLEMENT_APP(MyApp);

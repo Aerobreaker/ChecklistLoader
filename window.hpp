@@ -68,4 +68,9 @@ public:
     void Enable_Notes(bool enabled);
 
     ~MainFrame();
+
+    MainFrame(MainFrame &) = delete;
+    MainFrame(MainFrame &&) = delete;
+    MainFrame operator=(MainFrame) = delete;
+    MainFrame &operator=(MainFrame &) = delete;
 };

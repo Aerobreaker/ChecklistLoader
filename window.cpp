@@ -33,10 +33,10 @@ void MainFrame::AdvanceList(wxCommandEvent &evt) {
     step_1_label->UpdateLabel((*cur_list)[cur_ind]->value);
     row_1_sizer->SetLabel((*cur_list)[cur_ind]->key);
     if (++cur_ind == cur_list->size()) {
-        if (lists.size() < 2) {
-            main_sizer->Hide(row_2_sizer);
+        if (lists.size() < 2) {  // Why does MSVC issue a C5045 (spectre vulnerability warning) with Wall?  And furthermore, why does #pragma warning(disable:5045) not fix that?
+            main_sizer->Hide(row_2_sizer);  // Like yes, the CPU could start hiding row_2_sizer, but, like...how could that leak information?  And the whole thing is running in user space anyway, so...?
         } else {
-            OnUnSubList(evt);
+            OnUnSubList(evt);  // I mean I guess it could start reverting the sublist and advancing the list, but again, everything is already available in user space any way?  I'm so confused by this warning
             return AdvanceList(evt);
         }
     } else {
@@ -105,6 +105,7 @@ void MainFrame::OnLoad(wxCommandEvent &evt) {
 
     std::string fname = openFile.GetPath().ToStdString();
     LoadFile(fname);
+    evt.Skip();
 }
 
 void MainFrame::UnLoad() {
@@ -131,6 +132,7 @@ void MainFrame::UnLoad() {
 
 void MainFrame::OnUnload(wxCommandEvent &evt) {
     UnLoad();
+    evt.Skip();
 }
 
 void MainFrame::OnSubList(wxCommandEvent &evt) {
@@ -196,6 +198,7 @@ void MainFrame::OnNotes(wxCommandEvent &evt) {
     row_3_sizer->SetLabel((*cur_list)[cur_ind]->key + " Notes");
 
     Resize();
+    evt.Skip();
 }
 
 void MainFrame::OnUnNotes(wxCommandEvent &evt) {
@@ -215,6 +218,7 @@ void MainFrame::OnUnNotes(wxCommandEvent &evt) {
     Enable_Notes((*cur_list)[cur_ind]->notes.length() > 0);
 
     Resize();
+    evt.Skip();
 }
 
 void MainFrame::OnStayTop(wxCommandEvent &evt) {
@@ -227,6 +231,7 @@ void MainFrame::OnStayTop(wxCommandEvent &evt) {
     }
 
     SetWindowStyle(new_style);
+    evt.Skip();
 }
 
 MainFrame::MainFrame(wxWindow *parent, wxWindowID id, const wxString &title, const wxPoint &pos, const wxSize &size, long style) : wxFrame(parent, id, title, pos, size, style) {
@@ -298,40 +303,45 @@ MainFrame::MainFrame(wxWindow *parent, wxWindowID id, const wxString &title, con
 
     main_sizer = new wxBoxSizer(wxVERTICAL);
 
-#ifdef _WINDOWS
-    constexpr int sizer_flags = wxEXPAND;
-#else
     constexpr int all_flag = wxALL;
     constexpr int expand_flag = wxEXPAND;
-    constexpr int sizer_flags = all_flag | expand_flag;
+    constexpr int align_flag = wxALIGN_CENTER;
+    constexpr int align_right_flag = wxALIGN_RIGHT;
+    constexpr int check_and_label_flags = align_flag | all_flag;
+    constexpr int row_3_flags = all_flag | expand_flag;
+    constexpr int return_button_flags = all_flag | align_right_flag;
+#ifdef _WINDOWS
+    constexpr int sizer_flags = expand_flag;
+#else
+    constexpr int sizer_flags = row_3_flags;
 #endif // _WINDOWS
 
     row_1_sizer = new StepSizer(wxHORIZONTAL, this, "Step 0:");
     step_1_check = new wxCheckBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0);
-    row_1_sizer->Add(step_1_check, 0, wxALIGN_CENTER | wxALL, DEFAULT_BORDER);
+    row_1_sizer->Add(step_1_check, 0, check_and_label_flags, DEFAULT_BORDER);
     step_1_label = new SelectableText(this, wxID_ANY, DEFAULT_LABEL, wxALIGN_CENTER_HORIZONTAL);
-    row_1_sizer->Add(step_1_label, 1, wxALIGN_CENTER | wxALL, DEFAULT_BORDER);
+    row_1_sizer->Add(step_1_label, 1, check_and_label_flags, DEFAULT_BORDER);
     main_sizer->Add(row_1_sizer, 1, sizer_flags, DEFAULT_BORDER);
 
     row_2_sizer = new StepSizer(wxHORIZONTAL, this, "Step 1:");
     button_sizer = new wxBoxSizer(wxVERTICAL);
     step_2_check = new wxCheckBox(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0);
-    row_2_sizer->Add(step_2_check, 0, wxALIGN_CENTER | wxALL, DEFAULT_BORDER);
+    row_2_sizer->Add(step_2_check, 0, check_and_label_flags, DEFAULT_BORDER);
     step_2_label = new SelectableText(this, wxID_ANY, DEFAULT_LABEL, wxALIGN_CENTER_HORIZONTAL);
-    row_2_sizer->Add(step_2_label, 1, wxALIGN_CENTER | wxALL, DEFAULT_BORDER);
+    row_2_sizer->Add(step_2_label, 1, check_and_label_flags, DEFAULT_BORDER);
     step_2_button = new wxButton(this, wxID_ANY, "Load sub-list", wxDefaultPosition, wxDefaultSize, 0);
-    button_sizer->Add(step_2_button, 0, wxALIGN_CENTER | wxALL, DEFAULT_BORDER);
+    button_sizer->Add(step_2_button, 0, check_and_label_flags, DEFAULT_BORDER);
     notes_button = new wxButton(this, wxID_ANY, "Show notes", wxDefaultPosition, wxDefaultSize, 0);
-    button_sizer->Add(notes_button, 0, wxALIGN_CENTER | wxALL, DEFAULT_BORDER);
-    row_2_sizer->Add(button_sizer, 0, wxALIGN_CENTER | wxALL, DEFAULT_BORDER);
+    button_sizer->Add(notes_button, 0, check_and_label_flags, DEFAULT_BORDER);
+    row_2_sizer->Add(button_sizer, 0, check_and_label_flags, DEFAULT_BORDER);
     main_sizer->Add(row_2_sizer, 1, sizer_flags, DEFAULT_BORDER);
 
     row_3_sizer = new StepSizer(wxVERTICAL, this, "Notes:");
     notes_label = new SelectableText(this, wxID_ANY, wxEmptyString, wxTE_MULTILINE, true);
     notes_label->SetFont(wxFont(wxFontInfo().Family(wxFONTFAMILY_TELETYPE)));
-    row_3_sizer->Add(notes_label, 1, wxALL | wxEXPAND, DEFAULT_BORDER);
+    row_3_sizer->Add(notes_label, 1, row_3_flags, DEFAULT_BORDER);
     un_notes_button = new wxButton(this, wxID_ANY, "Return to checklist", wxDefaultPosition, wxDefaultSize, 0);
-    row_3_sizer->Add(un_notes_button, 0, wxALIGN_RIGHT | wxALL, DEFAULT_BORDER);
+    row_3_sizer->Add(un_notes_button, 0, return_button_flags, DEFAULT_BORDER);
     main_sizer->Add(row_3_sizer, 1, sizer_flags, DEFAULT_BORDER);
 
     Bind(wxEVT_SIZE, &MainFrame::OnSize, this);
@@ -435,6 +445,7 @@ void MainFrame::Resize() {
 
 void MainFrame::OnExit(wxCommandEvent &evt) {
     Close(true);
+    evt.Skip();
 }
 
 MainFrame::~MainFrame() {}
