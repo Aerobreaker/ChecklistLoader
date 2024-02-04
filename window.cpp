@@ -259,9 +259,11 @@ MainFrame::MainFrame(wxWindow *parent, wxWindowID id, const wxString &title, con
     * Q - Quit
     */
     wxMenu *file_menu = new wxMenu();
+#ifdef _WINDOWS
     m_stay_on_top = new wxMenuItem(file_menu, ID_OnTop, "&Stay on top", wxEmptyString, wxITEM_CHECK);
-    wxMenuItem *m_quit = new wxMenuItem(file_menu, wxID_EXIT);
     file_menu->Append(m_stay_on_top);
+#endif // _WINDOWS
+    wxMenuItem *m_quit = new wxMenuItem(file_menu, wxID_EXIT);
     file_menu->Append(m_quit);
     main_menu->Append(file_menu, "&File");
 
